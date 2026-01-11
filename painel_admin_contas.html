@@ -280,6 +280,17 @@
     <div class="purchases-list" id="purchasesList"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+// ================== SUPABASE CONFIG ==================
+const SUPABASE_URL = "https://pyzgoqmfmlmuhwmaoaou.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5emdvcW1mbWxtdWh3bWFvYW91Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwOTU3MTYsImV4cCI6MjA4MzY3MTcxNn0.FQfJyo-zxFsAO8wQw6BMTMHL6hOFK4KrbaAebj0p6hU";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ================== FIM SUPABASE CONFIG ==================
+</script>
+
 <script>
 let services = [
     { id:1, name:"Claro TV",   emoji:"📺", accounts:[] },
@@ -287,40 +298,17 @@ let services = [
     { id:3, name:"Sky",        emoji:"📡", accounts:[] },
     { id:4, name:"HBO Max",    emoji:"🎬", accounts:[] },
     { id:5, name:"Disney",     emoji:"🧚", accounts:[] },
-    { id:6, name:"Prime Video",emoji:"📦", accounts:[] }
+    { id:6, name:"Prime Video",emoji:"📦", accounts:[] },
+    { id:7, name:"testeeee",emoji:"📦", accounts:[] },
 ];
 
-const planDays = {
-    "1 Mês": 30,
-    "3 Meses": 90,
-    "6 Meses": 180,
-    "1 Ano": 365,
-    "Vitalício": 36500
-};
-
-function init() {
-    loadData();
-    renderServices();
-    renderPurchases();
-    window.addEventListener("storage", () => {
-        loadData();
-        renderServices();
-        renderPurchases();
-    });
+async function init() {
+    await renderServices();
+    await renderPurchases(); // já está usando Supabase
 }
 
-function loadData() {
-    const saved = localStorage.getItem("adminServices");
-    if (saved) services = JSON.parse(saved);
-    if (!localStorage.getItem("purchases")) localStorage.setItem("purchases","[]");
-}
+window.addEventListener("load", init);
 
-function saveData() {
-    localStorage.setItem("adminServices", JSON.stringify(services));
-    const accountsData = {};
-    services.forEach(s => accountsData[s.id] = s.accounts || []);
-    localStorage.setItem("accountsData", JSON.stringify(accountsData));
-}
 
 function switchTab(tabName) {
     document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
@@ -328,6 +316,7 @@ function switchTab(tabName) {
     document.getElementById(tabName).classList.add("active");
     event.target.classList.add("active");
 }
+
 
 function addNewService() {
     const name = document.getElementById("newServiceName").value.trim();
@@ -338,7 +327,6 @@ function addNewService() {
     }
     const newId = Math.max(...services.map(s => s.id), 0) + 1;
     services.push({ id:newId, name, emoji, accounts:[] });
-    saveData();
     document.getElementById("newServiceName").value = "";
     document.getElementById("newServiceEmoji").value = "";
     renderServices();
@@ -349,24 +337,81 @@ function moveFirstToLast() {
     if (services.length <= 1) return;
     const first = services.shift();
     services.push(first);
-    saveData();
     renderServices();
 }
 function moveLastToFirst() {
     if (services.length <= 1) return;
     const last = services.pop();
     services.unshift(last);
-    saveData();
     renderServices();
 }
 
-function renderServices() {
-    const grid = document.getElementById("servicesGrid");
-    grid.innerHTML = "";
+// Carrega contas do Supabase e organiza por serviço
+async function loadAccountsFromSupabase() {
+    const { data, error } = await supabaseClient
+        .from("accounts")
+        .select("*")
+        .order("service_name", { ascending: true });
 
+    if (error) {
+        console.error(error);
+        return [];
+    }
+
+    return data || [];
+}
+
+async function renderServices() {
+    const grid = document.getElementById("servicesGrid");
     const statusBar = document.getElementById("statusBar");
-    const totalAccounts = services.reduce((sum,s)=>sum+(s.accounts?s.accounts.length:0),0);
-    const activeServices = services.filter(s=>s.accounts && s.accounts.length>0).length;
+    if (!grid || !statusBar) return;
+
+    // busca todas as contas no Supabase
+    const accounts = await loadAccountsFromSupabase();
+
+    // descobre serviços distintos a partir das contas + base fixa
+    const serviceMap = new Map();
+
+    // se você quiser manter uma lista fixa de serviços:
+    const baseServices = [
+        { name: "Claro TV", emoji: "📺" },
+        { name: "Globo Play", emoji: "📺" },
+        { name: "Sky", emoji: "📡" },
+        { name: "HBO Max", emoji: "🎬" },
+        { name: "Disney", emoji: "🧚" },
+        { name: "Prime Video", emoji: "📦" },
+        { name: "testeeee", emoji: "📦" },
+
+    ];
+
+    baseServices.forEach(s => {
+      if (!serviceMap.has(s.name)) {
+        serviceMap.set(s.name, { name: s.name, emoji: s.emoji, accounts: [] });
+      }
+    });
+
+    accounts.forEach(acc => {
+        if (!serviceMap.has(acc.service_name)) {
+            serviceMap.set(acc.service_name, {
+                name: acc.service_name,
+                emoji: acc.emoji || "📺",
+                accounts: []
+            });
+        }
+        serviceMap.get(acc.service_name).accounts.push(acc);
+    });
+
+    const servicesList = Array.from(serviceMap.values());
+
+    const totalAccounts = accounts.length;
+    const activeServices = servicesList.filter(s => s.accounts.length > 0).length;
+
+    // atualiza status
+    const { data: purchasesData } = await supabaseClient
+        .from("purchases")
+        .select("id, status");
+
+    const activePurchases = (purchasesData || []).filter(p => p.status === "approved").length;
 
     statusBar.innerHTML = `
         <div class="status-card">
@@ -379,41 +424,48 @@ function renderServices() {
         </div>
         <div class="status-card">
             <h3>Compras Ativas</h3>
-            <div class="number" id="activePurchases">0</div>
+            <div class="number" id="activePurchases">${activePurchases}</div>
         </div>`;
 
-    const purchases = JSON.parse(localStorage.getItem("purchases") || "[]");
-    const activePurchases = purchases.filter(p => p.status === "approved").length;
-    document.getElementById("activePurchases").textContent = activePurchases;
-
-    services.forEach(service => {
+    // monta cards
+    grid.innerHTML = "";
+    servicesList.forEach(service => {
         const card = document.createElement("div");
         card.className = "service-card";
+
+        const textareaValue = service.accounts
+            .map(a => `${a.username}:${a.password}`)
+            .join("\n");
+
         card.innerHTML = `
             <div class="service-header">
                 <span>
                     <span style="font-size:1.5em;margin-right:10px;">${service.emoji}</span>
                     <span class="service-name">${service.name}</span>
                 </span>
-                <span class="service-count">${service.accounts ? service.accounts.length : 0}</span>
+                <span class="service-count">${service.accounts.length}</span>
             </div>
-            <textarea class="accounts-input" id="service-${service.id}"
-                      placeholder="Cole as contas aqui (usuario:senha)\nUma conta por linha">${
-                        service.accounts ? service.accounts.map(a=>`${a.usuario}:${a.senha}`).join("\n") : ""
-                      }</textarea>
+            <textarea class="accounts-input"
+                      data-service-name="${service.name}"
+                      data-service-emoji="${service.emoji}"
+                      placeholder="Cole as contas aqui (usuario:senha)\nUma conta por linha">${textareaValue}</textarea>
             <div class="btn-group">
-                <button class="btn" onclick="saveServiceAccounts(${service.id})">Salvar</button>
-                <button class="btn btn-delete" onclick="deleteService(${service.id})">Deletar</button>
+                <button class="btn" onclick="saveServiceAccounts('${service.name}')">Salvar</button>
+                <button class="btn btn-delete" onclick="deleteService('${service.name}')">Deletar</button>
             </div>`;
         grid.appendChild(card);
     });
 }
 
-function saveServiceAccounts(serviceId) {
-    const textarea = document.getElementById(`service-${serviceId}`);
+
+async function saveServiceAccounts(serviceName) {
+    const textarea = document.querySelector(`textarea[data-service-name="${serviceName}"]`);
     if (!textarea) return;
+
+    const emoji = textarea.getAttribute("data-service-emoji") || "📺";
     const text = textarea.value.trim();
-    const accounts = [];
+
+    const newAccounts = [];
     if (text) {
         const lines = text.split("\n");
         lines.forEach(line => {
@@ -421,31 +473,85 @@ function saveServiceAccounts(serviceId) {
             if (!line || !line.includes(":")) return;
             const parts = line.split(":");
             if (parts.length < 2) return;
-            const usuario = parts[0].trim();
-            const senha   = parts.slice(1).join(":").trim();
-            if (usuario && senha) accounts.push({usuario,senha});
+            const username = parts[0].trim();
+            const password = parts.slice(1).join(":").trim();
+            if (username && password) {
+                newAccounts.push({
+                    service_name: serviceName,
+                    emoji,
+                    username,
+                    password
+                });
+            }
         });
     }
-    const service = services.find(s => s.id === serviceId);
-    if (service) service.accounts = accounts;
-    saveData();
-    renderServices();
-    alert(`${accounts.length} contas salvas com sucesso!`);
+
+    // apaga contas antigas desse serviço
+    const { error: delError } = await supabaseClient
+        .from("accounts")
+        .delete()
+        .eq("service_name", serviceName);
+
+    if (delError) {
+        console.error(delError);
+        alert("Erro ao limpar contas antigas.");
+        return;
+    }
+
+    // insere novas contas (se tiver)
+    if (newAccounts.length > 0) {
+        const { error: insError } = await supabaseClient
+            .from("accounts")
+            .insert(newAccounts);
+
+        if (insError) {
+            console.error(insError);
+            alert("Erro ao salvar contas.");
+            return;
+        }
+    }
+
+    alert(`${newAccounts.length} contas salvas com sucesso!`);
+    await renderServices();
 }
 
-function deleteService(serviceId) {
-    const service = services.find(s => s.id === serviceId);
-    if (!service) return;
-    if (!confirm(`Tem certeza que quer deletar ${service.name}?`)) return;
-    services = services.filter(s => s.id !== serviceId);
-    saveData();
-    renderServices();
+
+async function deleteService(serviceName) {
+    if (!confirm(`Tem certeza que quer deletar todas as contas de ${serviceName}?`)) return;
+
+    const { error } = await supabaseClient
+        .from("accounts")
+        .delete()
+        .eq("service_name", serviceName);
+
+    if (error) {
+        console.error(error);
+        alert("Erro ao deletar serviço.");
+        return;
+    }
+
     alert("Serviço deletado com sucesso!");
+    await renderServices();
 }
 
-function renderPurchases() {
+
+// =========== COMPRAS VIA SUPABASE ===========
+
+async function renderPurchases() {
     const container = document.getElementById("purchasesList");
-    const purchases = JSON.parse(localStorage.getItem("purchases") || "[]");
+    if (!container) return;
+
+    // busca todas as compras ordenadas pela data de criação (mais recentes primeiro)
+    const { data: purchases, error } = await supabaseClient
+        .from("purchases")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        console.error(error);
+        container.innerHTML = `<p style="color:#ff6666;grid-column:1/-1;text-align:center;padding:30px;">Erro ao carregar compras.</p>`;
+        return;
+    }
 
     const pendingCount = purchases.filter(p => p.status === "pending").length;
     const pendingAlert = document.getElementById("pendingAlert");
@@ -462,91 +568,150 @@ function renderPurchases() {
         container.innerHTML = `<p style="color:#888;grid-column:1/-1;text-align:center;padding:30px;">Nenhuma compra registrada</p>`;
         return;
     }
-    container.innerHTML = purchases.map((p,idx) => `
+
+    container.innerHTML = purchases.map(p => `
         <div class="purchase-card">
             <div class="purchase-header">
-                <span>${p.planName}</span>
+                <span>${p.plan_name}</span>
                 <span style="color:#4caf50;">${p.pin || "Aguardando PIN"}</span>
             </div>
-            <div class="purchase-info">${p.planPrice}</div>
-            <div class="purchase-info">Cliente: ${p.payerName || "—"}</div>
-            <div class="purchase-info">Email: ${p.clientEmail || "—"}</div>
-            <div class="purchase-info">WhatsApp: ${p.clientWhatsapp || "—"}</div>
-            <div class="purchase-info">Data: ${p.purchaseDate || "—"}</div>
-            <div class="purchase-info">Expira: ${p.expiryDate || "—"}</div>
+            <div class="purchase-info">${p.plan_price || ""}</div>
+            <div class="purchase-info">Cliente: ${p.payer_name || "—"}</div>
+            <div class="purchase-info">Email: ${p.client_email || "—"}</div>
+            <div class="purchase-info">WhatsApp: ${p.client_whatsapp || "—"}</div>
+            <div class="purchase-info">Data: ${p.purchase_date ? new Date(p.purchase_date).toLocaleString("pt-BR") : "—"}</div>
+            <div class="purchase-info">Expira: ${p.expiry_date ? new Date(p.expiry_date).toLocaleString("pt-BR") : "—"}</div>
             <div class="purchase-info">
                 Status:
                 <span style="color:${
                     p.status === "approved" ? "#4caf50" :
                     p.status === "pending"  ? "#ffb300" :
                     "#ff4444"
-                };">${p.status.toUpperCase()}</span>
+                };">
+                    ${p.status.toUpperCase()}
+                </span>
             </div>
             ${
                 p.status === "pending"
                   ? `
-                    <button class="btn" onclick="approvePurchase(${idx})">Aprovar</button>
-                    <button class="btn btn-secondary" onclick="rejectPurchase(${idx})">Rejeitar</button>
+                    <button class="btn" onclick="approvePurchase('${p.id}')">Aprovar</button>
+                    <button class="btn btn-secondary" onclick="rejectPurchase('${p.id}')">Rejeitar</button>
                     `
                   : p.status === "approved"
-                  ? `<button class="btn btn-secondary" onclick="blockPurchase(${idx})">Bloquear Comprovante Falso</button>`
+                  ? `<button class="btn btn-secondary" onclick="blockPurchase('${p.id}')">Bloquear Comprovante Falso</button>`
                   : ""
             }
-        </div>`).join("");
+        </div>
+    `).join("");
 }
 
-function approvePurchase(index) {
-    const purchases = JSON.parse(localStorage.getItem("purchases") || "[]");
-    const p = purchases[index];
-    if (!p || p.status !== "pending") return;
-    if (!confirm(`Aprovar compra de ${p.payerName || "cliente"} (${p.planName})?`)) return;
+const planDays = {
+    "1 Mês": 30,
+    "3 Meses": 90,
+    "6 Meses": 180,
+    "1 Ano": 365,
+    "Vitalício": 36500
+};
 
-    const randomPin = String(Math.floor(Math.random()*1000000)).padStart(6,"0");
+async function approvePurchase(purchaseId) {
+    const { data: purchases, error } = await supabaseClient
+        .from("purchases")
+        .select("*")
+        .eq("id", purchaseId)
+        .single();
+
+    if (error || !purchases) {
+        alert("Erro ao carregar compra.");
+        console.error(error);
+        return;
+    }
+
+    const p = purchases;
+
+    if (p.status !== "pending") {
+        alert("Essa compra já foi analisada.");
+        return;
+    }
+
+    if (!confirm(`Aprovar compra de ${p.payer_name || "cliente"} (${p.plan_name})?`)) return;
+
+    const randomPin = String(Math.floor(Math.random() * 1000000)).padStart(6, "0");
     const now = new Date();
-    let daysToAdd = planDays[p.planName] || 30;
-    const expiryDate = new Date(now.getTime() + daysToAdd*24*60*60*1000);
+    let daysToAdd = planDays[p.plan_name] || 30;
+    const expiryDate = new Date(now.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
 
-    p.pin = randomPin;
-    p.purchaseDate = now.toLocaleString("pt-BR");
-    p.expiryDate = expiryDate.toLocaleString("pt-BR");
-    p.daysRemaining = daysToAdd === 36500 ? 999999 : daysToAdd;
-    p.status = "approved";
+    const { error: updError } = await supabaseClient
+        .from("purchases")
+        .update({
+            pin: randomPin,
+            status: "approved",
+            purchase_date: now.toISOString(),
+            expiry_date: expiryDate.toISOString()
+        })
+        .eq("id", purchaseId);
 
-    localStorage.setItem("purchases", JSON.stringify(purchases));
-    renderPurchases();
-    renderServices();
+    if (updError) {
+        console.error(updError);
+        alert("Erro ao aprovar compra.");
+        return;
+    }
+
+    await renderPurchases();
     alert(`Compra aprovada! PIN do cliente: ${randomPin}\n\nCopie e envie por email ou WhatsApp.`);
 }
 
-function rejectPurchase(index) {
-    const purchases = JSON.parse(localStorage.getItem("purchases") || "[]");
-    const p = purchases[index];
-    if (!p) return;
+async function rejectPurchase(purchaseId) {
     if (!confirm("Rejeitar esta comprovação de pagamento?")) return;
-    p.status = "rejected";
-    localStorage.setItem("purchases", JSON.stringify(purchases));
-    renderPurchases();
-    renderServices();
+
+    const { error } = await supabaseClient
+        .from("purchases")
+        .update({ status: "rejected" })
+        .eq("id", purchaseId);
+
+    if (error) {
+        console.error(error);
+        alert("Erro ao rejeitar compra.");
+        return;
+    }
+
+    await renderPurchases();
 }
 
-function blockPurchase(index) {
+async function blockPurchase(purchaseId) {
     if (!confirm("Tem certeza que quer bloquear este PIN?")) return;
-    const purchases = JSON.parse(localStorage.getItem("purchases") || "[]");
-    if (!purchases[index]) return;
-    purchases[index].status = "blocked";
-    localStorage.setItem("purchases", JSON.stringify(purchases));
-    renderPurchases();
-    renderServices();
-    alert("PIN bloqueado!");
+
+    const { error } = await supabaseClient
+        .from("purchases")
+        .update({ status: "blocked" })
+        .eq("id", purchaseId);
+
+    if (error) {
+        console.error(error);
+        alert("Erro ao bloquear compra.");
+        return;
+    }
+
+    await renderPurchases();
 }
 
-function clearAllPurchases() {
-    if (!confirm("Tem certeza que deseja limpar todos os clientes existentes em compras?")) return;
-    localStorage.setItem("purchases","[]");
-    renderPurchases();
-    renderServices();
-    alert("Clientes existentes em compras foram limpos com sucesso!");
+async function clearAllPurchases() {
+    if (!confirm("Tem certeza que quer limpar todos os clientes existentes?")) return;
+
+    const { error } = await supabaseClient
+        .from("purchases")
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000"); // truque para deletar todos
+
+    if (error) {
+        console.error(error);
+        alert("Erro ao limpar compras.");
+        return;
+    }
+
+    await renderPurchases();
 }
+// =========== FIM COMPRAS VIA SUPABASE ===========
+
 
 init();
 </script>
