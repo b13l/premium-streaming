@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Streaming - Contas VIP</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            padding: 20px;
+            color: #d4af37;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+        .main-content { display: flex; flex-direction: column; }
+        header { text-align: center; margin-bottom: 40px; padding: 20px; }
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #d4af37;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+            font-weight: bold;
+        }
+        header p { font-size: 1.2em; color: #b8860b; font-weight: 500; }
+
+        .notification-banner {
+            background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);
+            color: #0a0a0a;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+            animation: slideDown 0.5s ease;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+        }
+        .notification-banner.hidden { display: none; }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .access-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        .btn-access {
+            background: rgba(212, 175, 55, 0.1);
+            border: 2px solid #d4af37;
+            color: #d4af37;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        .btn-access:hover {
+            background: #d4af37;
+            color: #0a0a0a;
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+        }
+        .btn-access.active {
+            background: #d4af37;
+            color: #0a0a0a;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .product-card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.1);
+            transition: all 0.3s ease;
+            border: 2px solid rgba(212, 175, 55, 0.2);
+            position: relative;
+        }
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(212, 175, 55, 0.3);
+            border-color: #d4af37;
+        }
+        .product-card.best-offer {
+            border: 3px solid #d4af37;
+            background: linear-gradient(135deg, #2d2416 0%, #3d3520 100%);
+        }
+        .best-offer-badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #d4af37 0%, #f0c843 100%);
+            color: #0a0a0a;
+            padding: 8px 25px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+        }
+        .product-header { text-align: center; margin-bottom: 25px; }
+        .product-logo { font-size: 3.5em; margin-bottom: 15px; }
+        .product-name {
+            font-size: 1.8em;
+            color: #d4af37;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .product-price {
+            font-size: 2.5em;
+            color: #f0c843;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .product-price-label { font-size: 1em; color: #b8860b; margin-bottom: 20px; }
+
+        .benefits-list {
+            background: rgba(212, 175, 55, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #00d4ff;
+        }
+        .benefits-list h4 { color: #00d4ff; margin-bottom: 12px; }
+        .benefit-item {
+            color: #a0a0a0;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        .benefit-item::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #00d4ff;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-buy {
+            background: linear-gradient(135deg, #d4af37 0%, #f0c843 100%);
+            color: #0a0a0a;
+        }
+        .btn-buy:hover { transform: scale(1.05); }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+        }
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            border: 2px solid #d4af37;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+            margin: 20px 0;
+        }
+        .modal-header { text-align: center; margin-bottom: 20px; }
+        .modal-header h2 { color: #d4af37; margin-bottom: 10px; }
+
+        .pix-section {
+            background: rgba(212, 175, 55, 0.1);
+            border: 2px solid #d4af37;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .pix-label { color: #b8860b; font-size: 0.9em; margin-bottom: 10px; }
+        .pix-email {
+            background: #0a0a0a;
+            color: #00d4ff;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 1.1em;
+            border: 2px solid #00d4ff;
+            word-break: break-all;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+        .pix-email:hover { box-shadow: 0 0 15px rgba(0, 212, 255, 0.4); }
+        .pix-copy { color: #25d366; font-size: 0.85em; font-weight: bold; }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label {
+            display: block;
+            color: #d4af37;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: #0a0a0a;
+            border: 2px solid #d4af37;
+            border-radius: 8px;
+            color: #d4af37;
+            font-size: 1em;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-family: monospace;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #f0c843;
+            box-shadow: 0 0 15px rgba(240, 200, 67, 0.3);
+        }
+
+        .btn-group { display: flex; gap: 10px; }
+        .btn-group .btn { flex: 1; }
+        .btn-confirm {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        .btn-confirm:hover { transform: scale(1.05); }
+        .btn-cancel { background: #ff4444; color: white; }
+        .btn-cancel:hover { background: #ff5555; }
+
+        .logged-in-badge {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #0a0a0a;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.95em;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+        }
+        .logout-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+
+        .chat-panel {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-radius: 15px;
+            border: 2px solid #00d4ff;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+            display: flex;
+            flex-direction: column;
+            max-height: 800px;
+            position: sticky;
+            top: 20px;
+        }
+        .chat-panel.hidden { display: none; }
+        .chat-header {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #0a0a0a;
+            padding: 15px;
+            font-weight: bold;
+            border-radius: 13px 13px 0 0;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message-bubble {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #0a0a0a;
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-weight: bold;
+            animation: slideIn 0.3s ease;
+        }
+        .chat-empty {
+            color: #b8860b;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .auto-chat-section {
+            background: rgba(0, 212, 255, 0.1);
+            border: 2px solid #00d4ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .auto-chat-questions { display: flex; flex-direction: column; gap: 8px; }
+        .auto-question-btn {
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid #00d4ff;
+            color: #00d4ff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        .auto-question-btn:hover { background: #00d4ff; color: #0a0a0a; }
+
+        .error-message {
+            background: rgba(255, 68, 68, 0.2);
+            border: 2px solid #ff4444;
+            color: #ff6666;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .success-message {
+            background: rgba(40, 167, 69, 0.2);
+            border: 2px solid #28a745;
+            color: #66bb6a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .feedbacks-section { margin-bottom: 40px; }
+        .feedbacks-title {
+            color: #d4af37;
+            text-align: center;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+        .feedbacks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .feedback-card {
+            background: linear-gradient(135deg, #1a3a1a 0%, #2d4d2d 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #4caf50;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.2);
+            animation: slideIn 0.5s ease;
+        }
+        .feedback-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .feedback-name { color: #4caf50; font-weight: bold; font-size: 1.1em; }
+        .feedback-time { color: #b8860b; font-size: 0.8em; }
+        .feedback-plan {
+            background: rgba(76, 175, 80, 0.2);
+            color: #81c784;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            border: 1px solid #4caf50;
+        }
+        .feedback-text {
+            color: #a0a0a0;
+            font-size: 0.95em;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        .feedback-stars { color: #ffd700; font-size: 1.1em; }
+
+        .accounts-blur {
+            filter: blur(6px);
+            user-select: none;
+            pointer-events: none;
+        }
+        .reveal-btn {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #0a0a0a;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 15px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        .reveal-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+        .reveal-btn.revealed {
+            background: #28a745;
+            color: #fff;
+        }
+
+        .desktop-notifications {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .desktop-notification {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border: 2px solid #d4af37;
+            border-radius: 10px;
+            padding: 15px 20px;
+            color: #d4af37;
+            font-weight: bold;
+            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.4);
+            animation: slideInRight 0.4s ease;
+            min-width: 280px;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        .desktop-notification:hover { box-shadow: 0 8px 30px rgba(212, 175, 55, 0.6); }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(400px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideOutRight {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(400px); }
+        }
+        .desktop-notification.removing { animation: slideOutRight 0.4s ease forwards; }
+
+        @media (max-width: 1200px) {
+            .container { grid-template-columns: 1fr; }
+            .chat-panel { position: static; }
+            .desktop-notification {
+                min-width: 250px;
+                padding: 12px 15px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="desktop-notifications" id="desktopNotifications"></div>
+
+<div class="container">
+    <div class="main-content">
+        <header>
+            <h1>STREAMING PREMIUM VIP</h1>
+            <p>Acesso ilimitado a todas as plataformas</p>
+        </header>
+
+        <div id="notificationBanner" class="notification-banner hidden"></div>
+
+        <div class="access-buttons">
+            <button class="btn-access active" id="btnNewCustomer" onclick="switchMode('new')">Planos VIP</button>
+            <button class="btn-access" id="btnExistingCustomer" onclick="switchMode('existing')">Clientes Existentes</button>
+        </div>
+
+        <div id="loggedInInfo" style="text-align: center; display: none;">
+            <span class="logged-in-badge">Acesso Liberado</span>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+
+        <div id="errorContainer"></div>
+
+        <div id="feedbacksSection" class="feedbacks-section">
+            <div class="feedbacks-title">Clientes Satisfeitos</div>
+            <div class="feedbacks-grid" id="feedbacksGrid"></div>
+        </div>
+
+        <div class="products-grid" id="productsGrid"></div>
+    </div>
+
+    <div class="chat-panel" id="chatPanel">
+        <div class="chat-header">
+            <span>Chat Automático</span>
+        </div>
+        <div class="auto-chat-section" style="margin: 15px; border-radius: 10px;">
+            <p style="color: #d4af37; margin-bottom: 12px; font-weight: bold;">Perguntas Frequentes</p>
+            <div class="auto-chat-questions">
+                <button class="auto-question-btn" onclick="showAutoAnswer('Como funciona o serviço?')">Como funciona o serviço?</button>
+                <button class="auto-question-btn" onclick="showAutoAnswer('Qual o melhor plano?')">Qual o melhor plano?</button>
+                <button class="auto-question-btn" onclick="showAutoAnswer('Como faço para comprar?')">Como faço para comprar?</button>
+                <button class="auto-question-btn" onclick="showAutoAnswer('Qual a chave PIX?')">Qual a chave PIX?</button>
+                <button class="auto-question-btn" onclick="showAutoAnswer('Posso usar em vários dispositivos?')">Posso usar em vários dispositivos?</button>
+            </div>
+        </div>
+        <div class="chat-messages" id="chatMessages" style="margin: 0; border-top: 1px solid #00d4ff;">
+            <div class="chat-empty">Clique em uma pergunta para ver a resposta 👆</div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal PIN -->
+<div class="modal" id="pinModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div style="font-size: 3em; margin-bottom: 10px;">🔐</div>
+            <h2>Acesso VIP</h2>
+        </div>
+        <input type="password" id="pinInput" maxlength="6"
+               placeholder="••••••"
+               class="form-group"
+               style="width: 100%; padding: 12px; border: 2px solid #d4af37; border-radius: 8px; background: #0a0a0a; color: #d4af37; text-align: center; letter-spacing: 10px; font-size: 1.5em;"
+               onkeypress="if(event.key === 'Enter') validatePin()">
+        <div class="btn-group">
+            <button class="btn btn-confirm" onclick="validatePin()">Entrar</button>
+            <button class="btn btn-cancel" onclick="closePinModal()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal PIX -->
+<div class="modal" id="pixModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div style="font-size: 3em; margin-bottom: 10px;">💳</div>
+            <h2>Confirmar Pagamento</h2>
+            <p id="planInfo" style="color: #b8860b;"></p>
+        </div>
+
+        <div id="pixErrorContainer"></div>
+
+        <div class="pix-section">
+            <div class="pix-label">📱 Chave PIX (Email)</div>
+            <div class="pix-email" onclick="copyPix()">gabrielcardoso.trc@gmail.com</div>
+            <div class="pix-copy">✓ Clique para copiar</div>
+        </div>
+
+        <div class="form-group">
+            <label>Nome completo do pagador (como aparece no comprovante)</label>
+            <input type="text" id="payerFullName" placeholder="Ex: João da Silva">
+        </div>
+
+        <div class="form-group">
+            <label>Email (opcional, para receber o PIN)</label>
+            <input type="email" id="clientEmail" placeholder="Ex: cliente@gmail.com">
+        </div>
+
+        <div class="form-group">
+            <label>WhatsApp (opcional)</label>
+            <input type="text" id="clientWhatsapp" placeholder="DDD + número">
+        </div>
+
+        <div class="form-group">
+            <label>✅ Já pagou? Anexe o comprovante (imagem ou PDF do PIX)</label>
+            <input type="file" id="proofFile" accept="image/*,.pdf" onchange="validateAndPreviewProof()">
+        </div>
+
+        <div id="proofPreview" style="display: none; margin-bottom: 15px;">
+            <img id="proofImage" src=""
+                 style="width: 100%; border-radius: 8px; border: 2px solid #d4af37; max-height: 300px; object-fit: contain;">
+        </div>
+
+        <div id="pendingMessage"></div>
+
+        <div class="btn-group">
+            <button class="btn btn-confirm" onclick="confirmPayment()">✅ Confirmar Pagamento</button>
+            <button class="btn btn-cancel" onclick="closePix()">❌ Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const PIX_EMAIL = "gabrielcardoso.trc@gmail.com";
+const ADMIN_PIN = "633733";
+
+const nomes = ["Rafael","Lucas","Bruno","Pedro","Felipe","João","Marcus","Diego","André","Carlos","Gabriel","Gustavo","Rodrigo","Eduardo"];
+
+const plans = [
+    { id: 1, name: "1 Mês",  logo: "📺", price: "R$ 50,00",  duration: 1,  days: 30,   bestOffer: false },
+    { id: 2, name: "3 Meses",logo: "🎬", price: "R$ 65,00",  duration: 3,  days: 90,   bestOffer: false },
+    { id: 3, name: "6 Meses",logo: "🔥", price: "R$ 85,00",  duration: 6,  days: 180,  bestOffer: true  },
+    { id: 4, name: "1 Ano",  logo: "⭐", price: "R$ 150,00", duration: 12, days: 365,  bestOffer: false },
+    { id: 5, name: "Vitalício",logo: "👑", price: "R$ 500,00",duration: -1, days: 999999,bestOffer: false }
+];
+
+const autoAnswers = {
+    "Como funciona o serviço?": "Você compra um plano, recebe um PIN único e pode acessar todas as contas dos 6 serviços: Claro TV, Globo Play, Sky, HBO Max, Disney e Prime Video.\n\nAcesso imediato após aprovação manual do pagamento!",
+    "Qual o melhor plano?": "O plano de 6 Meses (R$ 85,00) é o melhor custo-benefício! Você economiza bastante em relação aos planos mensais.",
+    "Como faço para comprar?": "1) Escolha um plano e clique em \"Comprar Agora\".\n2) Faça o PIX para gabrielcardoso.trc@gmail.com.\n3) Anexe o comprovante.\n4) Aguarde aprovação manual e receba seu PIN (por email ou WhatsApp).",
+    "Qual a chave PIX?": "A chave PIX é: gabrielcardoso.trc@gmail.com.\nVocê pode copiar clicando no campo durante a compra.",
+    "Posso usar em vários dispositivos?": "Sim! Você pode usar as contas em quantos dispositivos quiser. Basta fazer login com as credenciais que você recebe."
+};
+
+let currentMode = "new";
+let isLoggedIn = false;
+let loggedInPin = null;
+let selectedPlan = null;
+let proofFileData = null;
+let accountsRevealed = {};
+
+function getRandomName() { return nomes[Math.floor(Math.random() * nomes.length)]; }
+
+function calculateTimeAgo(dateString) {
+    const date = new Date(dateString);
+    const now  = new Date();
+    const ms   = now - date;
+    const s = Math.floor(ms / 1000);
+    const m = Math.floor(ms / (1000*60));
+    const h = Math.floor(ms / (1000*60*60));
+    const d = Math.floor(ms / (1000*60*60*24));
+    if (s < 60) return "Agora mesmo";
+    if (m < 60) return `${m} minuto${m===1?"":"s"} atrás`;
+    if (h < 24) return `${h} hora${h===1?"":"s"} atrás`;
+    return `${d} dia${d===1?"":"s"} atrás`;
+}
+
+function init() {
+    loadData();
+    renderFeedbacks();
+    renderProducts();
+    setupRealtimeSync();
+    startRandomNotifications();
+}
+
+function showDesktopNotification() {
+    const randomName = getRandomName();
+    const randomPlan = plans[Math.floor(Math.random() * plans.length)];
+    const container = document.getElementById("desktopNotifications");
+    const n = document.createElement("div");
+    n.className = "desktop-notification";
+    n.innerHTML = `${randomName} comprou ${randomPlan.name}!`;
+    container.appendChild(n);
+    setTimeout(() => {
+        n.classList.add("removing");
+        setTimeout(() => n.remove(), 400);
+    }, 5600);
+}
+function startRandomNotifications() {
+    setInterval(showDesktopNotification, Math.random()*4000+3000);
+}
+
+function setupRealtimeSync() {
+    window.lastAccountsData = JSON.parse(localStorage.getItem("accountsData") || "{}");
+    window.lastPurchaseCount = 0;
+    setInterval(() => {
+        const purchases = JSON.parse(localStorage.getItem("purchases") || "[]");
+        if (purchases.length > window.lastPurchaseCount) {
+            window.lastPurchaseCount = purchases.length;
+            renderFeedbacks();
+        }
+        const currentAccountsData = JSON.parse(localStorage.getItem("accountsData") || "{}");
+        let newAccounts = false;
+        let newServiceName = null;
+        for (let serviceId in currentAccountsData) {
+            const last = window.lastAccountsData[serviceId] || [];
+            const cur  = currentAccountsData[serviceId] || [];
+            if (cur.length > last.length) {
+                newAccounts = true;
+                const services = JSON.parse(localStorage.getItem("adminServices") || "[]");
+                const service  = services.find(s => s.id == serviceId);
+                newServiceName = service ? service.name : "Serviço";
+                break;
+            }
+        }
+        if (newAccounts) showNotification(`Novas Contas Adicionadas em ${newServiceName}!`);
+        window.lastAccountsData = currentAccountsData;
+    }, 2000);
+}
+
+function showNotification(message) {
+    const banner = document.getElementById("notificationBanner");
+    banner.textContent = message;
+    banner.classList.remove("hidden");
+    setTimeout(() => banner.classList.add("hidden"), 4000);
+}
+
+function loadData() {
+    if (!localStorage.getItem("purchases")) localStorage.setItem("purchases","[]");
+    if (!localStorage.getItem("adminServices")) {
+        const defaultServices = [
+            { id: 1, name: "Claro TV", emoji: "📺", accounts: [] },
+            { id: 2, name: "Globo Play", emoji: "📺", accounts: [] },
+            { id: 3, name: "Sky", emoji: "📡", accounts: [] },
+            { id: 4, name: "HBO Max", emoji: "🎬", accounts: [] },
+            { id: 5, name: "Disney", emoji: "🧚", accounts: [] },
+            { id: 6, name: "Prime Video", emoji: "📦", accounts: [] }
+        ];
+        localStorage.setItem("adminServices", JSON.stringify(defaultServices));
+        const accountsData = {};
+        defaultServices.forEach(s => accountsData[s.id] = s.accounts || []);
+        localStorage.setItem("accountsData", JSON.stringify(accountsData));
+    } else {
+        const services = JSON.parse(localStorage.getItem("adminServices") || "[]");
+        const accountsData = {};
+        services.forEach(s => accountsData[s.id] = s.accounts || []);
+        localStorage.setItem("accountsData", JSON.stringify(accountsData));
+    }
+}
+
+function renderFeedbacks() {
+    const grid = document.getElementById("feedbacksGrid");
+    const purchases = JSON.parse(localStorage.getItem("purchases") || "[]");
+    const approved = purchases.filter(p => p.status === "approved").slice(-6);
+    if (approved.length === 0) {
+        grid.innerHTML = `<p style="color:#888;text-align:center;padding:30px;">Seja o primeiro a comprar!</p>`;
+        return;
+    }
+    grid.innerHTML = approved.map(p => {
+        const name = getRandomName();
+        const time = calculateTimeAgo(p.purchaseDate);
+        return `
+          <div class="feedback-card">
+            <div class="feedback-header">
+              <span class="feedback-name">${name}</span>
+              <span class="feedback-time">${time}</span>
+            </div>
+            <div class="feedback-plan">${p.planName}</div>
+            <div class="feedback-text">
+              Compra confirmada com sucesso!<br>
+              Acesso liberado após aprovação manual.
+            </div>
+            <div class="feedback-stars">★★★★★</div>
+          </div>`;
+    }).join("");
+}
+
+function showAutoAnswer(question) {
+    const answer = autoAnswers[question];
+    const container = document.getElementById("chatMessages");
+    container.innerHTML = `
+        <div style="margin-bottom:10px;">
+          <div style="color:#00d4ff;font-weight:bold;font-size:0.9em;margin-bottom:8px;">Sua Pergunta</div>
+          <div class="message-bubble">${question}</div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <div style="color:#d4af37;font-weight:bold;font-size:0.9em;margin-bottom:8px;">Resposta</div>
+          <div class="message-bubble" style="background:#d4af37;color:#0a0a0a;white-space:pre-wrap;">${answer}</div>
+        </div>`;
+}
+
+function copyPix() {
+    navigator.clipboard.writeText(PIX_EMAIL);
+    alert(`PIX copiado: ${PIX_EMAIL}`);
+}
+
+function validateAndPreviewProof() {
+    const file = document.getElementById("proofFile").files[0];
+    const errorContainer = document.getElementById("pixErrorContainer");
+    const payerName = document.getElementById("payerFullName").value.trim();
+    errorContainer.innerHTML = "";
+    document.getElementById("pendingMessage").innerHTML = "";
+
+    if (!payerName) {
+        errorContainer.innerHTML = `<div class="error-message">Digite o nome completo do pagador antes de enviar o comprovante.</div>`;
+        document.getElementById("proofFile").value = "";
+        return;
+    }
+    if (!file) return;
+
+    const payerFirstName = payerName.toLowerCase().split(" ")[0];
+
+    if (!(file.type.startsWith("image/") || file.type === "application/pdf")) {
+        errorContainer.innerHTML = `<div class="error-message">Apenas imagem ou PDF do comprovante são aceitos.</div>`;
+        document.getElementById("proofFile").value = "";
+        return;
+    }
+
+    if (file.type === "application/pdf") {
+        proofFileData = {
+            name: file.name,
+            data: null,
+            timestamp: new Date().toLocaleString("pt-BR"),
+            payerName,
+            payerFirstName
+        };
+        document.getElementById("proofPreview").style.display = "none";
+        errorContainer.innerHTML = `<div class="success-message">PDF anexado. A confirmação será feita manualmente pelo administrador.</div>`;
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            if (img.width < 200 || img.height < 200) {
+                errorContainer.innerHTML = `<div class="error-message">Imagem muito pequena! Envie um comprovante válido.</div>`;
+                document.getElementById("proofFile").value = "";
+                return;
+            }
+            proofFileData = {
+                name: file.name,
+                data: e.target.result,
+                timestamp: new Date().toLocaleString("pt-BR"),
+                payerName,
+                payerFirstName
+            };
+            document.getElementById("proofImage").src = e.target.result;
+            document.getElementById("proofPreview").style.display = "block";
+            errorContainer.innerHTML = `<div class="success-message">Comprovante anexado. A confirmação será feita manualmente pelo administrador.</div>`;
+        };
+        img.onerror = () => {
+            errorContainer.innerHTML = `<div class="error-message">Arquivo não é uma imagem válida!</div>`;
+            document.getElementById("proofFile").value = "";
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function confirmPayment() {
+    const errorContainer = document.getElementById("pixErrorContainer");
+    const pendingDiv = document.getElementById("pendingMessage");
+    errorContainer.innerHTML = "";
+    pendingDiv.innerHTML = "";
+
+    if (!proofFileData) {
+        errorContainer.innerHTML = `<div class="error-message">Anexe o comprovante de pagamento!</div>`;
+        return;
+    }
+    const payerName = document.getElementById("payerFullName").value.trim();
+    if (!payerName) {
+        errorContainer.innerHTML = `<div class="error-message">Digite o nome completo do pagador.</div>`;
+        return;
+    }
+
+    const clientEmail = document.getElementById("clientEmail").value.trim();
+    const clientWhatsapp = document.getElementById("clientWhatsapp").value.trim();
+
+    const purchases = JSON.parse(localStorage.getItem("purchases") || "[]");
+    const now = new Date();
+
+    const purchase = {
+        id: Date.now(),
+        planName: selectedPlan.name,
+        planPrice: selectedPlan.price,
+        pin: null,
+        purchaseDate: now.toLocaleString("pt-BR"),
+        expiryDate: null,
+        daysRemaining: 0,
+        proof: proofFileData,
+        payerName,
+        clientEmail,
+        clientWhatsapp,
+        status: "pending"
+    };
+
+    purchases.push(purchase);
+    localStorage.setItem("purchases", JSON.stringify(purchases));
+
+    pendingDiv.innerHTML = `
+        <div class="success-message">
+            Comprovante enviado com sucesso!<br>
+            Aguarde alguns minutos para liberação do seu PIN.<br>
+            Você receberá pelo email ou WhatsApp informado (se tiver preenchido).<br><br>
+            Não quer esperar?<br><br>
+            <button onclick="window.open('https://wa.me/message/PWMMI3VQ4LGLP1','_blank')"
+                    style="background:#25d366;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:bold;cursor:pointer;">
+                Chamar no WhatsApp agora
+            </button>
+        </div>
+    `;
+
+    document.getElementById("proofFile").value = "";
+    document.getElementById("proofPreview").style.display = "none";
+    proofFileData = null;
+    document.getElementById("clientEmail").value = "";
+    document.getElementById("clientWhatsapp").value = "";
+}
+
+function buyPlan(planId) {
+    selectedPlan = plans.find(p => p.id === planId);
+    document.getElementById("planInfo").textContent = `${selectedPlan.name} - ${selectedPlan.price}`;
+    document.getElementById("proofFile").value = "";
+    document.getElementById("proofPreview").style.display = "none";
+    document.getElementById("pixErrorContainer").innerHTML = "";
+    document.getElementById("pendingMessage").innerHTML = "";
+    document.getElementById("payerFullName").value = "";
+    document.getElementById("clientEmail").value = "";
+    document.getElementById("clientWhatsapp").value = "";
+    proofFileData = null;
+    document.getElementById("pixModal").classList.add("active");
+}
+
+function closePix() {
+    document.getElementById("pixModal").classList.remove("active");
+}
+
+function switchMode(mode) {
+    currentMode = mode;
+    document.getElementById("btnNewCustomer").classList.toggle("active", mode === "new");
+    document.getElementById("btnExistingCustomer").classList.toggle("active", mode === "existing");
+
+    if (mode === "new") {
+        document.getElementById("chatPanel").classList.remove("hidden");
+        document.getElementById("chatMessages").innerHTML = `<div class="chat-empty">Clique em uma pergunta para ver a resposta 👆</div>`;
+        document.getElementById("feedbacksSection").style.display = "block";
+    } else {
+        document.getElementById("feedbacksSection").style.display = "none";
+        if (!isLoggedIn) {
+            document.getElementById("pinModal").classList.add("active");
+            document.getElementById("chatPanel").classList.add("hidden");
+            return;
+        } else {
+            document.getElementById("chatPanel").classList.remove("hidden");
+        }
+    }
+    renderProducts();
+}
+
+function validatePin() {
+    const pin = document.getElementById("pinInput").value.trim();
+    if (!pin || pin.length !== 6) {
+        alert("PIN inválido! Digite os 6 dígitos.");
+        return;
+    }
+
+    if (pin === ADMIN_PIN) {
+        alert("Acesso Admin Liberado!");
+        isLoggedIn = true;
+        loggedInPin = pin;
+        document.getElementById("pinModal").classList.remove("active");
+        document.getElementById("loggedInInfo").style.display = "block";
+        document.getElementById("chatPanel").classList.remove("hidden");
+        renderProducts();
+        return;
+    }
+
+    const purchases = JSON.parse(localStorage.getItem("purchases") || "[]");
+    const purchase = purchases.find(p => p.pin === pin && p.status === "approved");
+
+    if (!purchase) {
+        alert("PIN incorreto ou ainda não aprovado!");
+        document.getElementById("pinInput").value = "";
+        return;
+    }
+
+    isLoggedIn = true;
+    loggedInPin = pin;
+    document.getElementById("pinModal").classList.remove("active");
+    document.getElementById("loggedInInfo").style.display = "block";
+    document.getElementById("chatPanel").classList.remove("hidden");
+    renderProducts();
+}
+
+function closePinModal() {
+    document.getElementById("pinModal").classList.remove("active");
+    switchMode("new");
+}
+
+function logout() {
+    isLoggedIn = false;
+    loggedInPin = null;
+    currentMode = "new";
+    accountsRevealed = {};
+    document.getElementById("loggedInInfo").style.display = "none";
+    document.getElementById("btnNewCustomer").classList.add("active");
+    document.getElementById("btnExistingCustomer").classList.remove("active");
+    document.getElementById("chatPanel").classList.add("hidden");
+    document.getElementById("feedbacksSection").style.display = "block";
+    renderProducts();
+}
+
+function toggleRevealAccounts(serviceId) {
+    accountsRevealed[serviceId] = !accountsRevealed[serviceId];
+    const card = document.querySelector(`[data-service-id="${serviceId}"]`);
+    if (!card) return;
+    const container = card.querySelector(".accounts-blur");
+    const btn = card.querySelector(".reveal-btn");
+    if (!container || !btn) return;
+
+    if (accountsRevealed[serviceId]) {
+        container.classList.remove("accounts-blur");
+        btn.textContent = "Ocultar Contas";
+        btn.classList.add("revealed");
+    } else {
+        container.classList.add("accounts-blur");
+        btn.textContent = "Mostrar Todas as Contas";
+        btn.classList.remove("revealed");
+    }
+}
+
+function renderProducts() {
+    const grid = document.getElementById("productsGrid");
+    grid.innerHTML = "";
+    accountsRevealed = {};
+
+    if (currentMode === "new") {
+        plans.forEach(plan => {
+            const card = document.createElement("div");
+            card.className = "product-card" + (plan.bestOffer ? " best-offer" : "");
+            card.innerHTML = `
+                ${plan.bestOffer ? `<div class="best-offer-badge">MELHOR OFERTA</div>` : ""}
+                <div class="product-header">
+                    <div class="product-logo">${plan.logo}</div>
+                    <h2 class="product-name">${plan.name}</h2>
+                    <div class="product-price">${plan.price}</div>
+                    <div class="product-price-label">${plan.duration === -1 ? "Para Sempre" : `${plan.duration} meses`}</div>
+                </div>
+                <div class="benefits-list">
+                    <h4>Incluso</h4>
+                    <div class="benefit-item">Claro TV</div>
+                    <div class="benefit-item">Globo Play</div>
+                    <div class="benefit-item">Sky</div>
+                    <div class="benefit-item">HBO Max</div>
+                    <div class="benefit-item">Disney</div>
+                    <div class="benefit-item">Prime Video</div>
+                </div>
+                <button class="btn btn-buy" onclick="buyPlan(${plan.id})">Comprar Agora</button>
+            `;
+            grid.appendChild(card);
+        });
+    } else if (currentMode === "existing" && isLoggedIn) {
+        const purchases = JSON.parse(localStorage.getItem("purchases") || "[]");
+        const userPurchase = purchases.find(p => p.pin === loggedInPin && p.status === "approved");
+
+        if (loggedInPin === ADMIN_PIN) {
+            let html = `<h2 style="color:#d4af37;text-align:center;margin-bottom:30px;grid-column:1/-1;">Todas as Contas Disponíveis</h2>`;
+            const accountsData = JSON.parse(localStorage.getItem("accountsData") || "{}");
+            const services = JSON.parse(localStorage.getItem("adminServices") || "[]");
+            services.forEach(service => {
+                const accounts = accountsData[service.id] || [];
+                html += `
+                  <div class="product-card" style="margin-bottom:20px;" data-service-id="${service.id}">
+                    <div class="product-header">
+                      <span class="product-logo">${service.emoji}</span>
+                      <span class="product-name">${service.name}</span>
+                    </div>
+                    ${
+                      accounts.length > 0
+                        ? `<div>
+                             ${accounts.map(acc => `
+                               <div style="background:#0a0a0a;padding:10px;margin-bottom:8px;border-radius:6px;border-left:3px solid #00d4ff;color:#00d4ff;font-family:monospace;font-size:0.9em;">
+                                 <strong>${acc.usuario}</strong><br>${acc.senha}
+                               </div>`).join("")}
+                           </div>`
+                        : `<div style="color:#888;text-align:center;padding:20px;">Nenhuma conta disponível</div>`
+                    }
+                  </div>`;
+            });
+            const container = document.createElement("div");
+            container.innerHTML = html;
+            grid.appendChild(container);
+        } else if (userPurchase) {
+            let accessHTML = `
+              <div style="text-align:center;margin-bottom:30px;grid-column:1/-1;">
+                <div style="background:rgba(76,175,80,0.2);border:2px solid #4caf50;color:#81c784;padding:15px;border-radius:8px;margin-bottom:15px;">
+                  <div style="font-weight:bold;margin-bottom:8px;">✅ Acesso Ativo</div>
+                  <div style="font-size:0.9em;">Plano: ${userPurchase.planName}</div>
+                  <div style="font-size:0.9em;">📅 Expira em: ${userPurchase.expiryDate}</div>
+                </div>
+              </div>`;
+            let html = accessHTML;
+            html += `<h2 style="color:#d4af37;text-align:center;margin-bottom:30px;grid-column:1/-1;">Todas as Contas Disponíveis</h2>`;
+
+            const accountsData = JSON.parse(localStorage.getItem("accountsData") || "{}");
+            const services = JSON.parse(localStorage.getItem("adminServices") || "[]");
+            services.forEach(service => {
+                const accounts = accountsData[service.id] || [];
+                html += `
+                  <div class="product-card" style="margin-bottom:20px;" data-service-id="${service.id}">
+                    <div class="product-header">
+                      <span class="product-logo">${service.emoji}</span>
+                      <span class="product-name">${service.name}</span>
+                    </div>
+                    ${
+                      accounts.length > 0
+                        ? `<div class="accounts-blur">
+                             ${accounts.map(acc => `
+                               <div style="background:#0a0a0a;padding:10px;margin-bottom:8px;border-radius:6px;border-left:3px solid #00d4ff;color:#00d4ff;font-family:monospace;font-size:0.9em;">
+                                 <strong>${acc.usuario}</strong><br>${acc.senha}
+                               </div>`).join("")}
+                           </div>
+                           <button class="reveal-btn" onclick="toggleRevealAccounts(${service.id})">
+                             Mostrar Todas as Contas
+                           </button>`
+                        : `<div style="color:#888;text-align:center;padding:20px;">Nenhuma conta disponível</div>`
+                    }
+                  </div>`;
+            });
+            const container = document.createElement("div");
+            container.innerHTML = html;
+            grid.appendChild(container);
+        } else {
+            grid.innerHTML = `<p style="color:#ff6666;text-align:center;padding:30px;">Nenhuma compra aprovada encontrada para este PIN.</p>`;
+        }
+    }
+}
+
+window.addEventListener("load", init);
+</script>
+</body>
+</html>
