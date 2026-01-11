@@ -965,13 +965,14 @@ function switchMode(mode) {
     renderProducts();
 }
 
-function validatePin() {
+async function validatePin() {
     const pin = document.getElementById("pinInput").value.trim();
     if (!pin || pin.length !== 6) {
         alert("PIN inválido! Digite os 6 dígitos.");
         return;
     }
 
+    // PIN de admin continua local
     if (pin === ADMIN_PIN) {
         alert("Acesso Admin Liberado!");
         isLoggedIn = true;
@@ -979,26 +980,39 @@ function validatePin() {
         document.getElementById("pinModal").classList.remove("active");
         document.getElementById("loggedInInfo").style.display = "block";
         document.getElementById("chatPanel").classList.remove("hidden");
-        renderProducts();
+        await renderProducts(); // agora pode ser assíncrono
         return;
     }
 
-    const purchases = JSON.parse(localStorage.getItem("purchases") || "[]");
-    const purchase = purchases.find(p => p.pin === pin && p.status === "approved");
+    // busca a compra aprovada no Supabase
+    const { data, error } = await supabaseClient
+        .from("purchases")
+        .select("*")
+        .eq("pin", pin)
+        .eq("status", "approved")
+        .maybeSingle();
 
-    if (!purchase) {
+    if (error) {
+        console.error(error);
+        alert("Erro ao validar PIN. Tente novamente.");
+        return;
+    }
+
+    if (!data) {
         alert("PIN incorreto ou ainda não aprovado!");
         document.getElementById("pinInput").value = "";
         return;
     }
 
+    // PIN válido para cliente
     isLoggedIn = true;
     loggedInPin = pin;
     document.getElementById("pinModal").classList.remove("active");
     document.getElementById("loggedInInfo").style.display = "block";
     document.getElementById("chatPanel").classList.remove("hidden");
-    renderProducts();
+    await renderProducts(data); // passa a compra para usar depois se quiser
 }
+
 
 function closePinModal() {
     document.getElementById("pinModal").classList.remove("active");
@@ -1037,12 +1051,14 @@ function toggleRevealAccounts(serviceId) {
     }
 }
 
-function renderProducts() {
+
+async function renderProducts(purchaseFromPin = null) {
     const grid = document.getElementById("productsGrid");
     grid.innerHTML = "";
     accountsRevealed = {};
 
     if (currentMode === "new") {
+        // ... SEU CÓDIGO DE PLANOS VIP PERMANECE IGUAL AQUI ...
         plans.forEach(plan => {
             const card = document.createElement("div");
             card.className = "product-card" + (plan.bestOffer ? " best-offer" : "");
@@ -1067,82 +1083,129 @@ function renderProducts() {
             `;
             grid.appendChild(card);
         });
-    } else if (currentMode === "existing" && isLoggedIn) {
-        const purchases = JSON.parse(localStorage.getItem("purchases") || "[]");
-        const userPurchase = purchases.find(p => p.pin === loggedInPin && p.status === "approved");
+        return;
+    }
 
-        if (loggedInPin === ADMIN_PIN) {
-            let html = `<h2 style="color:#d4af37;text-align:center;margin-bottom:30px;grid-column:1/-1;">Todas as Contas Disponíveis</h2>`;
-            const accountsData = JSON.parse(localStorage.getItem("accountsData") || "{}");
-            const services = JSON.parse(localStorage.getItem("adminServices") || "[]");
-            services.forEach(service => {
-                const accounts = accountsData[service.id] || [];
-                html += `
-                  <div class="product-card" style="margin-bottom:20px;" data-service-id="${service.id}">
-                    <div class="product-header">
-                      <span class="product-logo">${service.emoji}</span>
-                      <span class="product-name">${service.name}</span>
-                    </div>
-                    ${
-                      accounts.length > 0
-                        ? `<div>
-                             ${accounts.map(acc => `
-                               <div style="background:#0a0a0a;padding:10px;margin-bottom:8px;border-radius:6px;border-left:3px solid #00d4ff;color:#00d4ff;font-family:monospace;font-size:0.9em;">
-                                 <strong>${acc.usuario}</strong><br>${acc.senha}
-                               </div>`).join("")}
-                           </div>`
-                        : `<div style="color:#888;text-align:center;padding:20px;">Nenhuma conta disponível</div>`
-                    }
-                  </div>`;
-            });
-            const container = document.createElement("div");
-            container.innerHTML = html;
-            grid.appendChild(container);
-        } else if (userPurchase) {
-            let accessHTML = `
+    if (currentMode === "existing" && isLoggedIn) {
+        // carrega contas do Supabase
+        const { data: accounts, error } = await supabaseClient
+            .from("accounts")
+            .select("*")
+            .order("service_name", { ascending: true });
+
+        if (error) {
+            console.error(error);
+            grid.innerHTML = `<p style="color:#ff6666;text-align:center;padding:30px;">Erro ao carregar contas.</p>`;
+            return;
+        }
+
+        // compra do cliente (se PIN não for admin)
+        let userPurchase = null;
+        if (loggedInPin !== ADMIN_PIN) {
+            if (purchaseFromPin) {
+                userPurchase = purchaseFromPin;
+            } else {
+                const { data: purchaseData, error: purchaseError } = await supabaseClient
+                    .from("purchases")
+                    .select("*")
+                    .eq("pin", loggedInPin)
+                    .eq("status", "approved")
+                    .maybeSingle();
+
+                if (purchaseError) {
+                    console.error(purchaseError);
+                } else {
+                    userPurchase = purchaseData;
+                }
+            }
+        }
+
+        // agrupa contas por serviço
+        const serviceMap = new Map();
+        accounts.forEach(acc => {
+            if (!serviceMap.has(acc.service_name)) {
+                serviceMap.set(acc.service_name, {
+                    name: acc.service_name,
+                    emoji: acc.emoji || "📺",
+                    accounts: []
+                });
+            }
+            serviceMap.get(acc.service_name).accounts.push(acc);
+        });
+
+        const servicesList = Array.from(serviceMap.values());
+
+        // mensagem topo para cliente comum (não admin)
+        if (loggedInPin !== ADMIN_PIN && userPurchase) {
+            const accessHTML = `
               <div style="text-align:center;margin-bottom:30px;grid-column:1/-1;">
                 <div style="background:rgba(76,175,80,0.2);border:2px solid #4caf50;color:#81c784;padding:15px;border-radius:8px;margin-bottom:15px;">
                   <div style="font-weight:bold;margin-bottom:8px;">✅ Acesso Ativo</div>
-                  <div style="font-size:0.9em;">Plano: ${userPurchase.planName}</div>
-                  <div style="font-size:0.9em;">📅 Expira em: ${userPurchase.expiryDate}</div>
+                  <div style="font-size:0.9em;">Plano: ${userPurchase.plan_name}</div>
+                  <div style="font-size:0.9em;">📅 Expira em: ${
+                      userPurchase.expiry_date
+                        ? new Date(userPurchase.expiry_date).toLocaleString("pt-BR")
+                        : "—"
+                  }</div>
                 </div>
               </div>`;
-            let html = accessHTML;
-            html += `<h2 style="color:#d4af37;text-align:center;margin-bottom:30px;grid-column:1/-1;">Todas as Contas Disponíveis</h2>`;
-
-            const accountsData = JSON.parse(localStorage.getItem("accountsData") || "{}");
-            const services = JSON.parse(localStorage.getItem("adminServices") || "[]");
-            services.forEach(service => {
-                const accounts = accountsData[service.id] || [];
-                html += `
-                  <div class="product-card" style="margin-bottom:20px;" data-service-id="${service.id}">
-                    <div class="product-header">
-                      <span class="product-logo">${service.emoji}</span>
-                      <span class="product-name">${service.name}</span>
-                    </div>
-                    ${
-                      accounts.length > 0
-                        ? `<div class="accounts-blur">
-                             ${accounts.map(acc => `
-                               <div style="background:#0a0a0a;padding:10px;margin-bottom:8px;border-radius:6px;border-left:3px solid #00d4ff;color:#00d4ff;font-family:monospace;font-size:0.9em;">
-                                 <strong>${acc.usuario}</strong><br>${acc.senha}
-                               </div>`).join("")}
-                           </div>
-                           <button class="reveal-btn" onclick="toggleRevealAccounts(${service.id})">
-                             Mostrar Todas as Contas
-                           </button>`
-                        : `<div style="color:#888;text-align:center;padding:20px;">Nenhuma conta disponível</div>`
-                    }
-                  </div>`;
-            });
-            const container = document.createElement("div");
-            container.innerHTML = html;
-            grid.appendChild(container);
-        } else {
-            grid.innerHTML = `<p style="color:#ff6666;text-align:center;padding:30px;">Nenhuma compra aprovada encontrada para este PIN.</p>`;
+            const containerTop = document.createElement("div");
+            containerTop.innerHTML = accessHTML;
+            grid.appendChild(containerTop);
         }
+
+        // título
+        const titleDiv = document.createElement("div");
+        titleDiv.innerHTML = `<h2 style="color:#d4af37;text-align:center;margin-bottom:30px;grid-column:1/-1;">Todas as Contas Disponíveis</h2>`;
+        grid.appendChild(titleDiv);
+
+        // monta cards de serviço
+        servicesList.forEach(service => {
+            const card = document.createElement("div");
+            card.className = "product-card";
+            card.style.marginBottom = "20px";
+            card.setAttribute("data-service-id", service.name); // usa nome como id
+
+            let inner = `
+                <div class="product-header">
+                  <span class="product-logo">${service.emoji}</span>
+                  <span class="product-name">${service.name}</span>
+                </div>`;
+
+            if (service.accounts.length > 0) {
+                const accountsHtml = service.accounts.map(acc => `
+                    <div style="background:#0a0a0a;padding:10px;margin-bottom:8px;border-radius:6px;border-left:3px solid #00d4ff;color:#00d4ff;font-family:monospace;font-size:0.9em;">
+                        <strong>${acc.username}</strong><br>${acc.password}
+                    </div>
+                `).join("");
+
+                // admin vê direto, cliente vê desfocado
+                if (loggedInPin === ADMIN_PIN) {
+                    inner += `
+                        <div>
+                            ${accountsHtml}
+                        </div>`;
+                } else {
+                    inner += `
+                        <div class="accounts-blur">
+                            ${accountsHtml}
+                        </div>
+                        <button class="reveal-btn" onclick="toggleRevealAccounts('${service.name}')">
+                            Mostrar Todas as Contas
+                        </button>`;
+                }
+            } else {
+                inner += `<div style="color:#888;text-align:center;padding:20px;">Nenhuma conta disponível</div>`;
+            }
+
+            card.innerHTML = inner;
+            grid.appendChild(card);
+        });
+
+        return;
     }
 }
+
 
 window.addEventListener("load", init);
 </script>
