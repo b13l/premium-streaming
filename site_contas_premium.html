@@ -610,7 +610,16 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
+// ================== SUPABASE CONFIG ==================
+const SUPABASE_URL = "https://pyzgoqmfmlmuhwmaoaou.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5emdvcW1mbWxtdWh3bWFvYW91Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwOTU3MTYsImV4cCI6MjA4MzY3MTcxNn0.FQfJyo-zxFsAO8wQw6BMTMHL6hOFK4KrbaAebj0p6hU";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ================== FIM SUPABASE CONFIG ==================
+
 const PIX_EMAIL = "gabrielcardoso.trc@gmail.com";
 const ADMIN_PIN = "633733";
 
@@ -848,7 +857,7 @@ function validateAndPreviewProof() {
     reader.readAsDataURL(file);
 }
 
-function confirmPayment() {
+async function confirmPayment() {
     const errorContainer = document.getElementById("pixErrorContainer");
     const pendingDiv = document.getElementById("pendingMessage");
     errorContainer.innerHTML = "";
@@ -867,26 +876,33 @@ function confirmPayment() {
     const clientEmail = document.getElementById("clientEmail").value.trim();
     const clientWhatsapp = document.getElementById("clientWhatsapp").value.trim();
 
-    const purchases = JSON.parse(localStorage.getItem("purchases") || "[]");
     const now = new Date();
+    const purchaseDateISO = now.toISOString();
 
+    // monta objeto para o Supabase
     const purchase = {
-        id: Date.now(),
-        planName: selectedPlan.name,
-        planPrice: selectedPlan.price,
+        plan_name: selectedPlan.name,
+        plan_price: selectedPlan.price,
         pin: null,
-        purchaseDate: now.toLocaleString("pt-BR"),
-        expiryDate: null,
-        daysRemaining: 0,
-        proof: proofFileData,
-        payerName,
-        clientEmail,
-        clientWhatsapp,
-        status: "pending"
+        payer_name: payerName,
+        client_email: clientEmail || null,
+        client_whatsapp: clientWhatsapp || null,
+        status: "pending",
+        purchase_date: purchaseDateISO,
+        expiry_date: null,
+        proof_data: proofFileData.data || null
     };
 
-    purchases.push(purchase);
-    localStorage.setItem("purchases", JSON.stringify(purchases));
+    // envia para Supabase
+    const { error } = await supabaseClient
+        .from("purchases")
+        .insert(purchase);
+
+    if (error) {
+        console.error(error);
+        errorContainer.innerHTML = `<div class="error-message">Erro ao enviar o comprovante. Tente novamente.</div>`;
+        return;
+    }
 
     pendingDiv.innerHTML = `
         <div class="success-message">
@@ -907,6 +923,7 @@ function confirmPayment() {
     document.getElementById("clientEmail").value = "";
     document.getElementById("clientWhatsapp").value = "";
 }
+
 
 function buyPlan(planId) {
     selectedPlan = plans.find(p => p.id === planId);
