@@ -190,7 +190,7 @@
             box-shadow:0 0 15px rgba(240,200,67,0.3);
         }
 
-        .purchases-list {
+ .purchases-list {
             display:grid;
             grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
             gap:20px;
@@ -280,6 +280,7 @@
     <div class="purchases-list" id="purchasesList"></div>
 </div>
 
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -289,250 +290,32 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ================== FIM SUPABASE CONFIG ==================
-</script>
-
-<script>
-let services = [
-    { id:1, name:"Claro TV",   emoji:"📺", accounts:[] },
-    { id:2, name:"Globo Play", emoji:"📺", accounts:[] },
-    { id:3, name:"Sky",        emoji:"📡", accounts:[] },
-    { id:4, name:"HBO Max",    emoji:"🎬", accounts:[] },
-    { id:5, name:"Disney",     emoji:"🧚", accounts:[] },
-    { id:6, name:"Prime Video",emoji:"📦", accounts:[] },
-    { id:7, name:"testeeee",emoji:"📦", accounts:[] },
-];
-
-async function init() {
-    await renderServices();
-    await renderPurchases(); // já está usando Supabase
-}
-
-window.addEventListener("load", init);
 
 
+// --------- abas ---------
 function switchTab(tabName) {
-    document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
-    document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
-    document.getElementById(tabName).classList.add("active");
-    event.target.classList.add("active");
+  // esconde todos os conteúdos
+  document.querySelectorAll(".tab-content").forEach(el => {
+    el.classList.remove("active");
+  });
+
+  // remove ativo dos botões
+  document.querySelectorAll(".tab-btn").forEach(el => {
+    el.classList.remove("active");
+  });
+
+  // mostra a aba escolhida
+  const tabEl = document.getElementById(tabName);
+  if (tabEl) tabEl.classList.add("active");
+
+  // ativa botão correspondente
+  if (tabName === "contas") {
+    document.querySelector('.tab-btn:nth-child(1)')?.classList.add("active");
+  } else if (tabName === "compras") {
+    document.querySelector('.tab-btn:nth-child(2)')?.classList.add("active");
+  }
 }
 
-
-function addNewService() {
-    const name = document.getElementById("newServiceName").value.trim();
-    const emoji = document.getElementById("newServiceEmoji").value.trim();
-       if (!name || !emoji) {
-        alert("Preencha nome e emoji!");
-        return;
-    }
-    const newId = Math.max(...services.map(s => s.id), 0) + 1;
-    services.push({ id:newId, name, emoji, accounts:[] });
-    document.getElementById("newServiceName").value = "";
-    document.getElementById("newServiceEmoji").value = "";
-    renderServices();
-    alert("Serviço adicionado com sucesso!");
-}
-
-function moveFirstToLast() {
-    if (services.length <= 1) return;
-    const first = services.shift();
-    services.push(first);
-    renderServices();
-}
-function moveLastToFirst() {
-    if (services.length <= 1) return;
-    const last = services.pop();
-    services.unshift(last);
-    renderServices();
-}
-
-// Carrega contas do Supabase e organiza por serviço
-async function loadAccountsFromSupabase() {
-    const { data, error } = await supabaseClient
-        .from("accounts")
-        .select("*")
-        .order("service_name", { ascending: true });
-
-    if (error) {
-        console.error(error);
-        return [];
-    }
-
-    return data || [];
-}
-
-async function renderServices() {
-    const grid = document.getElementById("servicesGrid");
-    const statusBar = document.getElementById("statusBar");
-    if (!grid || !statusBar) return;
-
-    // busca todas as contas no Supabase
-    const accounts = await loadAccountsFromSupabase();
-
-    // descobre serviços distintos a partir das contas + base fixa
-    const serviceMap = new Map();
-
-    // se você quiser manter uma lista fixa de serviços:
-    const baseServices = [
-        { name: "Claro TV", emoji: "📺" },
-        { name: "Globo Play", emoji: "📺" },
-        { name: "Sky", emoji: "📡" },
-        { name: "HBO Max", emoji: "🎬" },
-        { name: "Disney", emoji: "🧚" },
-        { name: "Prime Video", emoji: "📦" },
-        { name: "testeeee", emoji: "📦" },
-
-    ];
-
-    baseServices.forEach(s => {
-      if (!serviceMap.has(s.name)) {
-        serviceMap.set(s.name, { name: s.name, emoji: s.emoji, accounts: [] });
-      }
-    });
-
-    accounts.forEach(acc => {
-        if (!serviceMap.has(acc.service_name)) {
-            serviceMap.set(acc.service_name, {
-                name: acc.service_name,
-                emoji: acc.emoji || "📺",
-                accounts: []
-            });
-        }
-        serviceMap.get(acc.service_name).accounts.push(acc);
-    });
-
-    const servicesList = Array.from(serviceMap.values());
-
-    const totalAccounts = accounts.length;
-    const activeServices = servicesList.filter(s => s.accounts.length > 0).length;
-
-    // atualiza status
-    const { data: purchasesData } = await supabaseClient
-        .from("purchases")
-        .select("id, status");
-
-    const activePurchases = (purchasesData || []).filter(p => p.status === "approved").length;
-
-    statusBar.innerHTML = `
-        <div class="status-card">
-            <h3>Total de Contas</h3>
-            <div class="number">${totalAccounts}</div>
-        </div>
-        <div class="status-card">
-            <h3>Serviços Ativos</h3>
-            <div class="number">${activeServices}</div>
-        </div>
-        <div class="status-card">
-            <h3>Compras Ativas</h3>
-            <div class="number" id="activePurchases">${activePurchases}</div>
-        </div>`;
-
-    // monta cards
-    grid.innerHTML = "";
-    servicesList.forEach(service => {
-        const card = document.createElement("div");
-        card.className = "service-card";
-
-        const textareaValue = service.accounts
-            .map(a => `${a.username}:${a.password}`)
-            .join("\n");
-
-        card.innerHTML = `
-            <div class="service-header">
-                <span>
-                    <span style="font-size:1.5em;margin-right:10px;">${service.emoji}</span>
-                    <span class="service-name">${service.name}</span>
-                </span>
-                <span class="service-count">${service.accounts.length}</span>
-            </div>
-            <textarea class="accounts-input"
-                      data-service-name="${service.name}"
-                      data-service-emoji="${service.emoji}"
-                      placeholder="Cole as contas aqui (usuario:senha)\nUma conta por linha">${textareaValue}</textarea>
-            <div class="btn-group">
-                <button class="btn" onclick="saveServiceAccounts('${service.name}')">Salvar</button>
-                <button class="btn btn-delete" onclick="deleteService('${service.name}')">Deletar</button>
-            </div>`;
-        grid.appendChild(card);
-    });
-}
-
-
-async function saveServiceAccounts(serviceName) {
-    const textarea = document.querySelector(`textarea[data-service-name="${serviceName}"]`);
-    if (!textarea) return;
-
-    const emoji = textarea.getAttribute("data-service-emoji") || "📺";
-    const text = textarea.value.trim();
-
-    const newAccounts = [];
-    if (text) {
-        const lines = text.split("\n");
-        lines.forEach(line => {
-            line = line.trim();
-            if (!line || !line.includes(":")) return;
-            const parts = line.split(":");
-            if (parts.length < 2) return;
-            const username = parts[0].trim();
-            const password = parts.slice(1).join(":").trim();
-            if (username && password) {
-                newAccounts.push({
-                    service_name: serviceName,
-                    emoji,
-                    username,
-                    password
-                });
-            }
-        });
-    }
-
-    // apaga contas antigas desse serviço
-    const { error: delError } = await supabaseClient
-        .from("accounts")
-        .delete()
-        .eq("service_name", serviceName);
-
-    if (delError) {
-        console.error(delError);
-        alert("Erro ao limpar contas antigas.");
-        return;
-    }
-
-    // insere novas contas (se tiver)
-    if (newAccounts.length > 0) {
-        const { error: insError } = await supabaseClient
-            .from("accounts")
-            .insert(newAccounts);
-
-        if (insError) {
-            console.error(insError);
-            alert("Erro ao salvar contas.");
-            return;
-        }
-    }
-
-    alert(`${newAccounts.length} contas salvas com sucesso!`);
-    await renderServices();
-}
-
-
-async function deleteService(serviceName) {
-    if (!confirm(`Tem certeza que quer deletar todas as contas de ${serviceName}?`)) return;
-
-    const { error } = await supabaseClient
-        .from("accounts")
-        .delete()
-        .eq("service_name", serviceName);
-
-    if (error) {
-        console.error(error);
-        alert("Erro ao deletar serviço.");
-        return;
-    }
-
-    alert("Serviço deletado com sucesso!");
-    await renderServices();
-}
 
 
 // =========== COMPRAS VIA SUPABASE ===========
@@ -710,10 +493,352 @@ async function clearAllPurchases() {
 
     await renderPurchases();
 }
-// =========== FIM COMPRAS VIA SUPABASE ===========
 
 
-init();
+// --------- serviços dinâmicos ---------
+async function loadAccountsForService(serviceId) {
+    const { data, error } = await supabaseClient
+        .from("accounts")
+        .select("*")
+        .eq("service_id", serviceId)
+        .order("created_at", { ascending: true });
+
+    if (error) {
+        console.error(error);
+        return [];
+    }
+    return data || [];
+}
+
+async function loadServicesAndRenderCards() {
+    const container = document.getElementById("servicesGrid");
+    const statusBar = document.getElementById("statusBar");
+    if (!container) return;
+
+    container.innerHTML = `
+        <div style="text-align:center;color:#ccc;padding:20px;">
+            Carregando serviços...
+        </div>
+    `;
+
+    const { data: services, error } = await supabaseClient
+        .from("services")
+        .select("*")
+        .order("position", { ascending: true });
+
+    if (error) {
+        console.error(error);
+        container.innerHTML = `
+            <div style="text-align:center;color:#ff6666;padding:20px;">
+                Erro ao carregar serviços.
+            </div>
+        `;
+        return;
+    }
+
+    if (!services || services.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center;color:#ccc;padding:20px;">
+                Nenhum serviço cadastrado ainda.
+            </div>
+        `;
+        if (statusBar) statusBar.innerHTML = "";
+        return;
+    }
+
+    // carrega contas de todos os serviços
+    const allAccounts = [];
+    for (const service of services) {
+        const accs = await loadAccountsForService(service.id);
+        service._accounts = accs;
+        allAccounts.push(...accs);
+    }
+
+    // status
+    if (statusBar) {
+        const totalAccounts = allAccounts.length;
+        const activeServices = services.filter(s => (s._accounts || []).length > 0).length;
+        const { data: purchasesData } = await supabaseClient
+            .from("purchases")
+            .select("id, status");
+        const activePurchases = (purchasesData || []).filter(p => p.status === "approved").length;
+
+        statusBar.innerHTML = `
+            <div class="status-card">
+                <h3>Total de Contas</h3>
+                <div class="number">${totalAccounts}</div>
+            </div>
+            <div class="status-card">
+                <h3>Serviços Ativos</h3>
+                <div class="number">${activeServices}</div>
+            </div>
+            <div class="status-card">
+                <h3>Compras Ativas</h3>
+                <div class="number">${activePurchases}</div>
+            </div>
+        `;
+    }
+
+    // monta cards
+    container.innerHTML = "";
+    services.forEach(service => {
+        const card = document.createElement("div");
+        card.className = "service-card";
+        card.setAttribute("data-service-id", service.id);
+
+        const emoji = service.emoji || "📦";
+        const name = service.name || "Sem nome";
+        const accounts = service._accounts || [];
+        const textareaValue = accounts.map(acc => `${acc.username}:${acc.password}`).join("\n");
+
+        card.innerHTML = `
+            <div class="service-header">
+                <span class="service-emoji">${emoji}</span>
+                <span class="service-name">${name}</span>
+                <span class="service-count" data-service-count="${service.id}">${accounts.length}</span>
+            </div>
+            <textarea class="service-accounts-input"
+                      placeholder="Cole as contas aqui (usuario:senha)\nUma conta por linha">${textareaValue}</textarea>
+            <div class="service-actions">
+                <button class="btn-save" onclick="saveAccountsForService('${service.id}')">Salvar</button>
+                <button class="btn-delete" onclick="deleteAccountsForService('${service.id}')">Deletar</button>
+            </div>
+        `;
+
+        container.appendChild(card);
+    });
+}
+
+async function saveAccountsForService(serviceId) {
+    const card = document.querySelector(`[data-service-id="${serviceId}"]`);
+    if (!card) return;
+
+    const textarea = card.querySelector(".service-accounts-input");
+    const countSpan = card.querySelector(`[data-service-count="${serviceId}"]`);
+    if (!textarea) return;
+
+    const text = textarea.value.trim();
+    const { data: serviceRow } = await supabaseClient
+        .from("services")
+        .select("name, emoji")
+        .eq("id", serviceId)
+        .maybeSingle();
+
+    const serviceName = serviceRow?.name || "Sem nome";
+    const emoji = serviceRow?.emoji || "📦";
+
+    const newAccounts = [];
+    if (text) {
+        const lines = text.split("\n");
+        for (let line of lines) {
+            line = line.trim();
+            if (!line || !line.includes(":")) continue;
+            const parts = line.split(":");
+            if (parts.length < 2) continue;
+            const username = parts[0].trim();
+            const password = parts.slice(1).join(":").trim();
+            if (username && password) {
+                newAccounts.push({
+                    service_id: serviceId,
+                    service_name: serviceName,
+                    emoji,
+                    username,
+                    password
+                });
+            }
+        }
+    }
+
+    const { error: delError } = await supabaseClient
+        .from("accounts")
+        .delete()
+        .eq("service_id", serviceId);
+
+    if (delError) {
+        console.error(delError);
+        alert("Erro ao limpar contas antigas.");
+        return;
+    }
+
+    if (newAccounts.length > 0) {
+        const { error: insError } = await supabaseClient
+            .from("accounts")
+            .insert(newAccounts);
+
+        if (insError) {
+            console.error(insError);
+            alert("Erro ao salvar contas.");
+            return;
+        }
+    }
+
+    if (countSpan) countSpan.textContent = String(newAccounts.length);
+    alert(`${newAccounts.length} contas salvas com sucesso!`);
+}
+
+async function deleteAccountsForService(serviceId) {
+    if (!confirm("Tem certeza que quer deletar ESTE SERVIÇO e todas as contas dele?")) return;
+
+    // 1) apaga contas
+    const { error: accError } = await supabaseClient
+        .from("accounts")
+        .delete()
+        .eq("service_id", serviceId);
+
+    if (accError) {
+        console.error(accError);
+        alert("Erro ao deletar contas.");
+        return;
+    }
+
+    // 2) apaga o próprio serviço
+    const { error: svcError } = await supabaseClient
+        .from("services")
+        .delete()
+        .eq("id", serviceId);
+
+    if (svcError) {
+        console.error(svcError);
+        alert("Contas apagadas, mas houve erro ao deletar o serviço.");
+        return;
+    }
+
+    // 3) atualiza UI
+    await loadServicesAndRenderCards();
+    alert("Serviço e contas deletados com sucesso!");
+}
+
+async function reloadServicesPositions(services) {
+    try {
+        for (let index = 0; index < services.length; index++) {
+            const s = services[index];
+            const { error } = await supabaseClient
+                .from("services")
+                .update({ position: index + 1 })
+                .eq("id", s.id);
+
+            if (error) {
+                console.error(error);
+                alert("Erro ao atualizar ordem dos serviços.");
+                return false;
+            }
+        }
+        return true;
+    } catch (e) {
+        console.error(e);
+        alert("Erro ao atualizar ordem dos serviços.");
+        return false;
+    }
+}
+
+
+
+async function moveFirstToLast() {
+    const { data: services, error } = await supabaseClient
+        .from("services")
+        .select("*")
+        .order("position", { ascending: true });
+
+    if (error || !services || services.length <= 1) return;
+
+    const first = services.shift();
+    services.push(first);
+
+    const ok = await reloadServicesPositions(services);
+    if (ok) await loadServicesAndRenderCards();
+}
+
+async function moveLastToFirst() {
+    const { data: services, error } = await supabaseClient
+        .from("services")
+        .select("*")
+        .order("position", { ascending: true });
+
+    if (error || !services || services.length <= 1) return;
+
+    const last = services.pop();
+    services.unshift(last);
+
+    const ok = await reloadServicesPositions(services);
+    if (ok) await loadServicesAndRenderCards();
+}
+
+
+// handler do botão Adicionar Serviço
+document.addEventListener("DOMContentLoaded", () => {
+    const btnAdd = document.getElementById("btnAddService");
+    if (btnAdd) {
+        btnAdd.addEventListener("click", addServiceFromForm);
+    }
+});
+
+async function addServiceFromForm() {
+    const nameInput  = document.getElementById("newServiceName");
+    const emojiInput = document.getElementById("newServiceEmoji");
+    if (!nameInput || !emojiInput) return;
+
+    const name  = nameInput.value.trim();
+    const emoji = emojiInput.value.trim() || "📦";
+
+    if (!name) {
+        alert("Informe o nome do serviço.");
+        return;
+    }
+
+    // posição: último + 1
+    const { data: existing, error: posError } = await supabaseClient
+        .from("services")
+        .select("position")
+        .order("position", { ascending: false })
+        .limit(1);
+
+    let nextPos = 1;
+    if (!posError && existing && existing.length > 0) {
+        nextPos = (existing[0].position || 0) + 1;
+    }
+
+    const { error } = await supabaseClient
+        .from("services")
+        .insert({
+            name,
+            emoji,
+            position: nextPos
+        });
+
+    if (error) {
+        console.error(error);
+        alert("Erro ao adicionar serviço.");
+        return;
+    }
+
+    nameInput.value = "";
+    emojiInput.value = "";
+    await loadServicesAndRenderCards();
+    alert("Serviço adicionado com sucesso!");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const btnFirstLast = document.getElementById("btnMoveFirstToLast");
+    const btnLastFirst = document.getElementById("btnMoveLastToFirst");
+
+    if (btnFirstLast) {
+        btnFirstLast.addEventListener("click", moveFirstToLast);
+    }
+    if (btnLastFirst) {
+        btnLastFirst.addEventListener("click", moveLastToFirst);
+    }
+});
+
+
+
+// --------- inicialização ---------
+async function init() {
+    await renderPurchases();
+    await loadServicesAndRenderCards();
+}
+window.addEventListener("load", init);
+
 </script>
+
 </body>
 </html>
