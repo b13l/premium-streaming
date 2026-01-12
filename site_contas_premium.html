@@ -536,6 +536,15 @@
         </div>
         <div class="chat-messages" id="chatMessages" style="margin: 0; border-top: 1px solid #00d4ff;">
             <div class="chat-empty">Clique em uma pergunta para ver a resposta 👆</div>
+
+    <div class="success-message">
+            Chamar o Suporte <br><br>
+            <button onclick="window.open('https://wa.me/message/PWMMI3VQ4LGLP1','_blank')"
+                    style="background:#25d366;color:#fff;border:none;padding:5px 5px;border-radius:5px;font-weight:bold;cursor:pointer;">
+                Chamar no WhatsApp agora
+            </button>
+        </div>
+
         </div>
     </div>
 </div>
@@ -573,6 +582,7 @@
         <div class="pix-section">
             <div class="pix-label">📱 Chave PIX (Email)</div>
             <div class="pix-email" onclick="copyPix()">gabrielcardoso.trc@gmail.com</div>
+            <div class="banco-label">📱(Banco) NEON</div>
             <div class="pix-copy">✓ Clique para copiar</div>
         </div>
 
@@ -752,7 +762,7 @@ function renderFeedbacks() {
     const purchases = JSON.parse(localStorage.getItem("purchases") || "[]");
     const approved = purchases.filter(p => p.status === "approved").slice(-6);
     if (approved.length === 0) {
-        grid.innerHTML = `<p style="color:#888;text-align:center;padding:30px;">Seja o primeiro a comprar!</p>`;
+        grid.innerHTML = `<p style="color:#888;text-align:center;padding:30px;">🌟🌟🌟OS MELHORES STREAMINGS VC SÓ ENCONTRA AQUI🌟🌟🌟</p>`;
         return;
     }
     grid.innerHTML = approved.map(p => {
