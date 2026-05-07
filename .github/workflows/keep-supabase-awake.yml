@@ -1,11 +1,9 @@
-# .github/workflows/keep-supabase-awake.yml
 name: Keep Supabase Awake
 
 on:
   schedule:
-    # A cada 12 horas – evita a pausa do Supabase Free (7 dias sem atividade)
     - cron: '0 */12 * * *'
-  workflow_dispatch:  # permite rodar manualmente
+  workflow_dispatch:
 
 jobs:
   ping-supabase:
@@ -16,14 +14,3 @@ jobs:
           curl -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/services?select=id&limit=1" \
           -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
           -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
-
-      - name: Ping Site do Cliente (opcional)
-        if: ${{ secrets.CLIENT_SITE_URL }}
-        run: curl -s -o /dev/null -w "%{http_code}\n" "${{ secrets.CLIENT_SITE_URL }}"
-
-      - name: Ping Painel Administrativo (opcional)
-        if: ${{ secrets.ADMIN_SITE_URL }}
-        run: curl -s -o /dev/null -w "%{http_code}\n" "${{ secrets.ADMIN_SITE_URL }}"
-
-      - name: Mostrar horário da última execução
-        run: echo "Keep alive executado em $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
