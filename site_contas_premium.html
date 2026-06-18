@@ -322,6 +322,14 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const PIX_EMAIL = "gabrielcardoso.trc@gmail.com";
 const ADMIN_PIN = "633733";
 
+// Gerenciamento de dispositivo
+const DEVICE_ID_KEY = 'premium_device_id';
+let currentDeviceId = localStorage.getItem(DEVICE_ID_KEY);
+if (!currentDeviceId) {
+  currentDeviceId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36);
+  localStorage.setItem(DEVICE_ID_KEY, currentDeviceId);
+}
+
 const nomes = ["Rafael","Lucas","Bruno","Pedro","Felipe","João","Marcus","Diego","André","Carlos","Gabriel","Gustavo","Rodrigo","Eduardo","Mateus","Thiago","Leonardo","Vinícius","Henrique","Daniel","Alexandre","Leandro","Fábio","Ricardo","Fernando","Marcelo","Paulo","Renato","Sérgio","Tiago","Caio","Murilo","Igor","Davi","Samuel","Otávio","Guilherme","Renan","Adriano","Cláudio","Roberto","Wellington","Anderson","Douglas","Márcio","Patrick","Julio","Evandro","Flávio","Alan","Vagner","Nilson","Emerson","Luciano","Elias","Cristiano","Walisson","Jonatan","Fabian","Alexsandro","Ana","Julia","Fernanda","Camila","Beatriz","Larissa","Mariana","Amanda","Priscila","Letícia","Isabela","Natália","Aline","Bruna","Tatiane","Vanessa","Renata","Patrícia","Débora","Giovana","Sabrina","Monique","Jéssica","Cláudia","Simone","Adriana","Michele","Viviane","Bianca","Raquel","Eliane","Sueli","Karine","Thaís","Nathalia","Flávia","Luciana","Luana","Dandara","Yasmin","Kevin","Ryan","Bryan","Willian","Erick","Cleiton","Jadson","Danilo","Rogério","Alisson","Wesley","Marcos","Edson","Valdecir","Welton","Gleisson","Jhonatan","Maikel","Claysson","Rômulo"];
 
 const plans = [
@@ -654,32 +662,83 @@ function handleVideoModalClick(e) { if (e.target === document.getElementById("vi
 
 // ---------- AUTENTICAÇÃO ----------
 async function validatePin() {
-    const pin = document.getElementById("pinInput").value.trim();
-    if (pin.length !== 6) { alert("PIN inválido!"); return; }
-    if (pin === ADMIN_PIN) {
-        isLoggedIn = true; loggedInPin = pin;
-        document.getElementById("pinModal").classList.remove("active");
-        document.getElementById("loggedInInfo").style.display = "block";
-        document.getElementById("btnVideos").style.display = "inline-block";
-        document.getElementById("chatPanel").classList.add("hidden");
-        document.getElementById("feedbacksSection").style.display = "none";
-        renderProducts(); return;
+  const pin = document.getElementById("pinInput").value.trim();
+  if (pin.length !== 6) { alert("PIN inválido!"); return; }
+
+  // ---- ACESSO ADMIN (com segurança) ----
+  if (pin === ADMIN_PIN) {
+    // Verifica se o admin está bloqueado globalmente
+    const { data: config, error: configError } = await supabaseClient
+      .from("admin_config")
+      .select("*")
+      .eq("id", 1)
+      .maybeSingle();
+    if (configError || !config) {
+      alert("Erro ao verificar configuração de administrador.");
+      return;
     }
-    const { data: purchase } = await supabaseClient.from("purchases").select("*").eq("pin", pin).eq("status", "approved").maybeSingle();
-    if (!purchase) { alert("PIN incorreto ou não aprovado!"); return; }
-    // Verificar expiração (exceto Vitalício)
-    if (purchase.plan_name !== "Vitalício" && purchase.expiry_date && new Date(purchase.expiry_date) < new Date()) {
-        alert("Este PIN expirou. Entre em contato para renovar.");
-        return;
+    if (config.is_blocked) {
+      alert("⛔ Acesso de administrador temporariamente bloqueado.");
+      return;
     }
+
+    // Verifica se o dispositivo já está autorizado
+    const allowed = config.allowed_devices || [];
+    if (!allowed.includes(currentDeviceId)) {
+      // Dispositivo não autorizado → envia solicitação
+      const { data: existingReq } = await supabaseClient
+        .from("device_requests")
+        .select("*")
+        .eq("device_id", currentDeviceId)
+        .eq("status", "pending")
+        .maybeSingle();
+
+      if (!existingReq) {
+        await supabaseClient.from("device_requests").insert({
+          device_id: currentDeviceId,
+          status: "pending"
+        });
+      }
+
+      alert("🛡️ Novo dispositivo detectado. Uma solicitação de acesso foi enviada ao administrador. Aguarde a aprovação.");
+      return;
+    }
+
+    // Dispositivo autorizado → acesso liberado
     isLoggedIn = true; loggedInPin = pin;
     document.getElementById("pinModal").classList.remove("active");
     document.getElementById("loggedInInfo").style.display = "block";
     document.getElementById("btnVideos").style.display = "inline-block";
     document.getElementById("chatPanel").classList.add("hidden");
     document.getElementById("feedbacksSection").style.display = "none";
-    renderProducts(purchase);
+    renderProducts();
+    return;
+  }
+
+  // ---- ACESSO DE CLIENTE (normal) ----
+  const { data: purchase } = await supabaseClient
+    .from("purchases")
+    .select("*")
+    .eq("pin", pin)
+    .eq("status", "approved")
+    .maybeSingle();
+
+  if (!purchase) { alert("PIN incorreto ou não aprovado!"); return; }
+
+  if (purchase.plan_name !== "Vitalício" && purchase.expiry_date && new Date(purchase.expiry_date) < new Date()) {
+    alert("Este PIN expirou. Entre em contato para renovar.");
+    return;
+  }
+
+  isLoggedIn = true; loggedInPin = pin;
+  document.getElementById("pinModal").classList.remove("active");
+  document.getElementById("loggedInInfo").style.display = "block";
+  document.getElementById("btnVideos").style.display = "inline-block";
+  document.getElementById("chatPanel").classList.add("hidden");
+  document.getElementById("feedbacksSection").style.display = "none";
+  renderProducts(purchase);
 }
+
 function closePinModal() { document.getElementById("pinModal").classList.remove("active"); switchMode("new"); }
 function logout() {
     isLoggedIn = false; loggedInPin = null;
