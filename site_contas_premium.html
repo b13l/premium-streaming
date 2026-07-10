@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Premium Streaming - Contas VIP</title>
     <style>
+        /* ===== RESET E ESTILOS GERAIS ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -13,55 +14,159 @@
             padding: 10px;
             color: #00ff88;
         }
-        .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+        .container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
         header { text-align: center; margin-bottom: 25px; padding: 15px; }
         header h1 { font-size: 2em; color: #00ff88; text-shadow: 0 0 15px rgba(0,255,136,0.6); }
         header p { font-size: 1em; color: #00cc66; }
 
-        .access-buttons { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+        /* ===== BANNER DE NOVIDADES ===== */
+        .news-banner {
+            background: linear-gradient(135deg, #1a0f00, #2a1f00);
+            border: 2px solid #ff00cc;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 30px rgba(255,0,204,0.2), 0 0 60px rgba(255,0,204,0.1);
+            animation: neonBorder 2s ease-in-out infinite alternate;
+            display: none;
+        }
+        .news-banner.visible { display: block; }
+        @keyframes neonBorder {
+            0% { border-color: #ff00cc; box-shadow: 0 0 20px rgba(255,0,204,0.2); }
+            100% { border-color: #ff8800; box-shadow: 0 0 40px rgba(255,136,0,0.4); }
+        }
+        .news-banner h3 {
+            color: #ff00cc;
+            font-size: 1.2em;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .news-banner h3 .pulse {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #ff00cc;
+            border-radius: 50%;
+            animation: pulse 1s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+        .news-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .news-item {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,0,204,0.3);
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: 0.9em;
+            color: #ddd;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .news-item .icon { font-size: 1.2em; }
+        .news-item .title { color: #ffa500; font-weight: bold; }
+        .news-item .time { color: #888; font-size: 0.8em; }
+
+        /* ===== BOTÕES DE ACESSO ===== */
+        .access-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
         .btn-access {
-            background: rgba(0,255,136,0.1); border: 2px solid #00ff88; color: #00ff88;
-            padding: 8px 25px; border-radius: 20px; cursor: pointer; font-weight: bold;
-            font-size: 0.95em; transition: all 0.3s;
+            background: rgba(0,255,136,0.1);
+            border: 2px solid #00ff88;
+            color: #00ff88;
+            padding: 8px 25px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.95em;
+            transition: all 0.3s;
         }
         .btn-access:hover, .btn-access.active {
-            background: #00ff88; color: #0a0a0a; box-shadow: 0 0 20px rgba(0,255,136,0.6);
+            background: #00ff88;
+            color: #0a0a0a;
+            box-shadow: 0 0 20px rgba(0,255,136,0.6);
         }
         #btnExistingCustomer {
-            background: rgba(204,68,255,0.1); border-color: #cc44ff; color: #cc44ff;
+            background: rgba(204,68,255,0.1);
+            border-color: #cc44ff;
+            color: #cc44ff;
         }
         #btnExistingCustomer:hover, #btnExistingCustomer.active {
-            background: #cc44ff; color: #0a0a0a;
+            background: #cc44ff;
+            color: #0a0a0a;
         }
         #btnVideos {
-            background: rgba(255,34,68,0.1); border-color: #ff2244; color: #ff2244;
+            background: rgba(255,34,68,0.1);
+            border-color: #ff2244;
+            color: #ff2244;
         }
         #btnVideos:hover, #btnVideos.active { background: #ff2244; color: #fff; }
         #btnMusicas {
-            background: rgba(255,165,0,0.1); border-color: #ffa500; color: #ffa500;
+            background: rgba(255,165,0,0.1);
+            border-color: #ffa500;
+            color: #ffa500;
         }
         #btnMusicas:hover, #btnMusicas.active { background: #ffa500; color: #0a0a0a; }
         #btnAdminPlaylists {
-            background: rgba(0,255,255,0.1); border-color: #00ffff; color: #00ffff;
+            background: rgba(0,255,255,0.1);
+            border-color: #00ffff;
+            color: #00ffff;
         }
         #btnAdminPlaylists:hover, #btnAdminPlaylists.active { background: #00ffff; color: #0a0a0a; }
+        /* Botões para não logados (planos) */
+        #btnVideosPlans, #btnMusicPlans {
+            background: rgba(255,165,0,0.1);
+            border-color: #ffa500;
+            color: #ffa500;
+        }
+        #btnVideosPlans:hover, #btnVideosPlans.active { background: #ffa500; color: #0a0a0a; }
+        #btnMusicPlans:hover, #btnMusicPlans.active { background: #ffa500; color: #0a0a0a; }
 
+        /* ===== PLANOS ===== */
         .products-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
         }
         .product-card {
             background: linear-gradient(135deg, #0d1a14 0%, #1a2e20 100%);
-            border-radius: 12px; padding: 15px; border: 2px solid rgba(0,255,136,0.25);
-            transition: 0.3s; position: relative; text-align: center;
+            border-radius: 12px;
+            padding: 15px;
+            border: 2px solid rgba(0,255,136,0.25);
+            transition: 0.3s;
+            position: relative;
+            text-align: center;
         }
         .product-card:hover { transform: translateY(-6px); border-color: #00ff88; }
         .best-offer {
-            border: 2px solid #ff8800; background: linear-gradient(135deg, #1a1300 0%, #2d2200 100%);
+            border: 2px solid #ff8800;
+            background: linear-gradient(135deg, #1a1300 0%, #2d2200 100%);
         }
         .best-offer-badge {
-            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
             background: linear-gradient(135deg, #ff8800 0%, #ffaa00 100%);
-            color: #0a0a0a; padding: 5px 20px; border-radius: 15px; font-weight: bold; font-size: 0.8em;
+            color: #0a0a0a;
+            padding: 5px 20px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.8em;
         }
         .product-header { margin-bottom: 15px; }
         .product-logo { font-size: 2.5em; }
@@ -69,14 +174,29 @@
         .product-price { font-size: 2em; color: #00aaff; font-weight: bold; margin: 8px 0; }
         .product-price-label { font-size: 0.85em; color: #00cc66; }
         .benefits-list {
-            background: rgba(0,255,136,0.05); padding: 12px; border-radius: 8px;
-            border-left: 3px solid #00aaff; margin: 12px 0; text-align: left;
+            background: rgba(0,255,136,0.05);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #00aaff;
+            margin: 12px 0;
+            text-align: left;
         }
         .benefit-item { color: #aaffcc; font-size: 0.9em; margin: 4px 0; padding-left: 18px; position: relative; }
         .benefit-item::before { content: "•"; position: absolute; left: 0; color: #00aaff; }
         .btn { padding: 8px 16px; border: none; border-radius: 6px; font-size: 0.9em; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-buy { width: 100%; padding: 12px; background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%); color: #0a0a0a; }
-        .btn-show-accounts { background: linear-gradient(135deg, #00aaff 0%, #0077cc 100%); color: #0a0a0a; margin-top: 10px; width: 100%; padding: 12px; }
+        .btn-buy {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%);
+            color: #0a0a0a;
+        }
+        .btn-show-accounts {
+            background: linear-gradient(135deg, #00aaff 0%, #0077cc 100%);
+            color: #0a0a0a;
+            margin-top: 10px;
+            width: 100%;
+            padding: 12px;
+        }
         .btn-music-assinar {
             width: 100%;
             padding: 12px;
@@ -101,36 +221,103 @@
         .btn-save:hover { background: #3d8b40; }
         .btn-cancel { background: #888; color: #fff; }
         .btn-cancel:hover { background: #666; }
+        .btn-refresh {
+            background: #00aaff;
+            color: #0a0a0a;
+            padding: 8px 20px;
+            border-radius: 30px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-refresh:hover {
+            background: #0088cc;
+            transform: scale(1.05);
+        }
+        .btn-refresh:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
+        /* ===== DESTAQUE NEON "NOVO" ===== */
+        .neon-new {
+            position: relative;
+        }
+        .neon-new::after {
+            content: "NOVO";
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ff00cc;
+            color: #fff;
+            font-size: 0.6em;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px #ff00cc, 0 0 30px #ff00cc, 0 0 60px #ff00cc;
+            animation: neonPulse 1.5s ease-in-out infinite;
+            z-index: 10;
+            letter-spacing: 1px;
+        }
+        @keyframes neonPulse {
+            0%, 100% { box-shadow: 0 0 5px #ff00cc, 0 0 10px #ff00cc; }
+            50% { box-shadow: 0 0 20px #ff00cc, 0 0 40px #ff00cc, 0 0 60px #ff00cc; }
+        }
+
+        /* ===== FEEDBACKS ===== */
         .feedbacks-section { margin-bottom: 20px; }
         .feedbacks-title { color: #00ff88; text-align: center; font-size: 1.8em; margin-bottom: 15px; font-weight: bold; }
         .testimonial-carousel {
             background: linear-gradient(135deg, #0d1a0d 0%, #1a2e1a 100%);
-            border: 2px solid #4caf50; border-radius: 16px; padding: 25px 20px;
-            text-align: center; max-width: 600px; margin: 0 auto;
+            border: 2px solid #4caf50;
+            border-radius: 16px;
+            padding: 25px 20px;
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
             box-shadow: 0 0 25px rgba(76,175,80,0.3);
         }
         .testimonial-avatar { font-size: 3em; }
         .testimonial-name { color: #4caf50; font-weight: bold; font-size: 1.4em; margin: 8px 0 4px; }
         .testimonial-plan {
-            background: rgba(76,175,80,0.2); color: #81c784;
-            padding: 4px 16px; border-radius: 20px; font-size: 0.9em; display: inline-block;
-            margin-bottom: 8px; border: 1px solid #4caf50;
+            background: rgba(76,175,80,0.2);
+            color: #81c784;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-bottom: 8px;
+            border: 1px solid #4caf50;
         }
         .testimonial-text { color: #aaffcc; font-size: 1em; margin: 10px 0; font-style: italic; }
         .testimonial-time { color: #81c784; font-size: 0.8em; margin-top: 6px; }
         .testimonial-stars { color: #ffd700; font-size: 1.4em; letter-spacing: 3px; }
 
+        /* ===== NOTIFICAÇÕES ===== */
         .purchase-notifications {
-            position: fixed; top: 10px; left: 10px; z-index: 9999;
-            display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
         }
         .purchase-notification {
             background: linear-gradient(135deg, #0d1a14 0%, #1a2e20 100%);
-            border: 2px solid #00ff88; border-radius: 10px; padding: 10px 15px;
-            color: #00ff88; font-weight: bold; box-shadow: 0 0 15px rgba(0,255,136,0.3);
-            animation: slideInLeft 0.4s ease; min-width: 250px; pointer-events: auto;
-            cursor: default; font-size: 0.9em;
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 10px 15px;
+            color: #00ff88;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(0,255,136,0.3);
+            animation: slideInLeft 0.4s ease;
+            min-width: 250px;
+            pointer-events: auto;
+            cursor: default;
+            font-size: 0.9em;
         }
         .purchase-notification.removing { animation: slideOutLeft 0.4s ease forwards; }
         @keyframes slideInLeft {
@@ -142,50 +329,99 @@
             to { opacity: 0; transform: translateX(-400px); }
         }
 
+        /* ===== CONTAS (MODAL) ===== */
         .account-line {
-            background: #0a0a0a; padding: 10px; margin-bottom: 8px; border-radius: 6px;
-            border-left: 3px solid #00aaff; color: #00aaff; font-family: monospace;
-            font-size: 0.9em; word-break: break-all; position: relative;
+            background: #0a0a0a;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 3px solid #00aaff;
+            color: #00aaff;
+            font-family: monospace;
+            font-size: 0.9em;
+            word-break: break-all;
+            position: relative;
             transition: filter 0.4s ease;
         }
         .account-line.blurred { filter: blur(4px); user-select: none; }
         .copy-account-btn, .access-account-btn {
-            position: absolute; top: 8px; right: 8px; border: none; border-radius: 4px;
-            padding: 4px 10px; font-size: 0.8em; cursor: pointer; font-weight: bold;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 10px;
+            font-size: 0.8em;
+            cursor: pointer;
+            font-weight: bold;
         }
         .copy-account-btn { background: #00aaff; color: #000; }
         .copy-account-btn:hover { background: #0088cc; }
         .access-account-btn { background: #ff8800; color: #000; text-decoration: none; }
         .access-account-btn:hover { background: #ffaa00; }
 
+        /* ===== CHAT ===== */
         .chat-panel {
-            background: #111; border-radius: 12px; border: 2px solid #00aaff;
-            max-height: 500px; position: sticky; top: 10px;
+            background: #111;
+            border-radius: 12px;
+            border: 2px solid #00aaff;
+            max-height: 500px;
+            position: sticky;
+            top: 10px;
         }
         .chat-header {
-            background: #00aaff; color: #0a0a0a; padding: 10px; font-weight: bold;
+            background: #00aaff;
+            color: #0a0a0a;
+            padding: 10px;
+            font-weight: bold;
             border-radius: 10px 10px 0 0;
         }
         .auto-question-btn {
-            background: rgba(0,170,255,0.1); border: 1px solid #00aaff; color: #00aaff;
-            padding: 8px; margin: 4px 0; border-radius: 6px; cursor: pointer;
-            text-align: left; width: 100%;
+            background: rgba(0,170,255,0.1);
+            border: 1px solid #00aaff;
+            color: #00aaff;
+            padding: 8px;
+            margin: 4px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
         }
 
+        /* ===== MODAIS ===== */
         .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 1000; align-items: center;
-            justify-content: center; overflow-y: auto;
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
         }
         .modal.active { display: flex; }
         .modal-content {
             background: linear-gradient(135deg, #0d1a14 0%, #1a2e20 100%);
-            padding: 20px; border-radius: 12px; max-width: 480px; width: 90%;
-            border: 2px solid #00ff88; margin: 15px 0; position: relative;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            border: 2px solid #00ff88;
+            margin: 15px 0;
+            position: relative;
         }
         .close-modal-btn {
-            position: absolute; top: 10px; right: 15px; background: none; border: none;
-            color: #ff4444; font-size: 1.5em; cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #ff4444;
+            font-size: 1.5em;
+            cursor: pointer;
         }
         .modal-content input, .modal-content textarea {
             width: 100%;
@@ -205,19 +441,28 @@
         .modal-actions { display: flex; gap: 10px; margin-top: 10px; }
         .modal-actions .btn { flex: 1; text-align: center; }
 
-        /* ===== SEÇÃO MÚSICA ===== */
+        /* ===== SEÇÃO MÚSICA - LAYOUT DUAS COLUNAS ===== */
         .music-section {
-            background: rgba(255,165,0,0.03);
+            background: radial-gradient(ellipse at center, #1a0f00 0%, #0a0a0a 70%);
             border: 2px solid #ffa500;
             border-radius: 16px;
             padding: 25px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(255,165,0,0.1);
+            animation: bgPulse 10s ease-in-out infinite alternate;
+        }
+        @keyframes bgPulse {
+            0% { background: radial-gradient(ellipse at 20% 50%, #1a0f00, #0a0a0a); }
+            100% { background: radial-gradient(ellipse at 80% 50%, #1a0f00, #0a0a0a); }
         }
         .music-section h2 {
             color: #ffa500;
             text-align: center;
-            font-size: 1.8em;
+            font-size: 2em;
             margin-bottom: 5px;
             font-weight: bold;
+            text-shadow: 0 0 20px rgba(255,165,0,0.3);
         }
         .music-section .subtitle {
             text-align: center;
@@ -229,9 +474,83 @@
             border-radius: 8px;
             border: 1px solid rgba(255,165,0,0.2);
         }
-        .music-section .subtitle strong {
-            color: #ffa500;
+        .music-section .subtitle strong { color: #ffa500; }
+
+        .music-layout {
+            display: flex;
+            gap: 25px;
+            align-items: flex-start;
         }
+        .music-sidebar {
+            flex: 0 0 280px;
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+            position: sticky;
+            top: 10px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255,165,0,0.2);
+            backdrop-filter: blur(5px);
+        }
+        .music-sidebar::-webkit-scrollbar { width: 5px; }
+        .music-sidebar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .music-sidebar::-webkit-scrollbar-thumb { background: #ffa500; border-radius: 10px; }
+
+        .music-content { flex: 1; min-width: 0; }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .toolbar .info { color: #aaa; font-size: 0.9em; }
+        .toolbar .info span { color: #ffa500; font-weight: bold; }
+
+        .filter-section { margin-bottom: 15px; }
+        .filter-section h4 {
+            color: #ffa500;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255,165,0,0.2);
+            padding-bottom: 5px;
+        }
+        .filter-section .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .filter-section .category-btn,
+        .filter-section .artist-btn {
+            background: rgba(255,165,0,0.08);
+            border: 1px solid rgba(255,165,0,0.2);
+            color: #ffa500;
+            padding: 4px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.75em;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+        .filter-section .category-btn:hover,
+        .filter-section .category-btn.active {
+            background: #ffa500;
+            color: #0a0a0a;
+            border-color: #ffa500;
+        }
+        .filter-section .artist-btn:hover,
+        .filter-section .artist-btn.active {
+            background: #00aaff;
+            color: #0a0a0a;
+            border-color: #00aaff;
+        }
+        .filter-section .category-btn.active { background: #ffa500; color: #0a0a0a; }
+        .filter-section .artist-btn.active { background: #00aaff; color: #0a0a0a; }
 
         .music-plans-grid {
             display: grid;
@@ -251,39 +570,29 @@
             border-color: #ffa500;
             transform: translateY(-5px);
         }
-        .music-plan-card .plan-price {
-            font-size: 2.2em;
-            color: #ffa500;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        .music-plan-card .plan-name {
-            color: #fff;
-            font-size: 1.2em;
-        }
-        .music-plan-card .plan-duration {
-            color: #aaa;
-            font-size: 0.9em;
-        }
+        .music-plan-card .plan-price { font-size: 2.2em; color: #ffa500; font-weight: bold; margin: 10px 0; }
+        .music-plan-card .plan-name { color: #fff; font-size: 1.2em; }
+        .music-plan-card .plan-duration { color: #aaa; font-size: 0.9em; }
 
         .search-box {
             position: relative;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         .search-box input {
             width: 100%;
             padding: 14px 20px 14px 50px;
-            background: #0a0a0a;
+            background: rgba(0,0,0,0.7);
             border: 2px solid #ffa500;
             color: #fff;
             border-radius: 50px;
             font-size: 1em;
             transition: 0.3s;
             outline: none;
+            backdrop-filter: blur(5px);
         }
         .search-box input:focus {
             border-color: #ff8800;
-            box-shadow: 0 0 20px rgba(255,165,0,0.2);
+            box-shadow: 0 0 30px rgba(255,165,0,0.15);
         }
         .search-box .icon {
             position: absolute;
@@ -296,45 +605,105 @@
 
         .playlists-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 25px;
             margin-bottom: 20px;
         }
         .playlist-card {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2a1f0a 100%);
-            border: 2px solid rgba(255,165,0,0.3);
-            border-radius: 12px;
+            background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+            border: 2px solid rgba(255,165,0,0.25);
+            border-radius: 16px;
             padding: 15px;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .playlist-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(255,165,0,0.05), transparent, rgba(255,165,0,0.05), transparent);
+            animation: rotateGlow 15s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes rotateGlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         .playlist-card:hover {
             border-color: #ffa500;
-            box-shadow: 0 8px 30px rgba(255,165,0,0.15);
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 0 10px 40px rgba(255,165,0,0.2);
         }
         .playlist-card .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
+            position: relative;
+            z-index: 1;
         }
         .playlist-card h3 {
             color: #ffa500;
-            font-size: 1.1em;
+            font-size: 1.05em;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(255,165,0,0.2);
+        }
+        .playlist-card .card-artist {
+            color: #00aaff;
+            font-size: 0.85em;
             font-weight: 600;
+            margin-bottom: 4px;
+            position: relative;
+            z-index: 1;
+        }
+        .playlist-card .card-genre {
+            background: rgba(255,165,0,0.15);
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            color: #ffa500;
+            border: 1px solid rgba(255,165,0,0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 1;
         }
         .playlist-card .card-desc {
-            color: #bbb;
-            font-size: 0.9em;
-            margin-bottom: 10px;
+            color: #ccc;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
         }
         .playlist-card iframe {
             width: 100%;
-            height: 400px;
-            border-radius: 8px;
+            height: 300px;
+            border-radius: 10px;
             border: none;
             background: #0a0a0a;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 0 30px rgba(255,165,0,0.05);
         }
 
+        .loading-spinner { text-align: center; padding: 30px; color: #ffa500; }
+        .loading-spinner .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,165,0,0.2);
+            border-top: 4px solid #ffa500;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* ===== ADMIN ===== */
         .admin-playlist-form {
             background: rgba(0,255,255,0.05);
             border: 1px solid #00ffff;
@@ -360,7 +729,6 @@
             cursor: pointer;
             font-weight: bold;
         }
-
         .admin-playlist-item {
             background: #1a1a1a;
             padding: 12px;
@@ -373,29 +741,13 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-        .admin-playlist-item .info {
-            flex: 1;
-            min-width: 200px;
-        }
-        .admin-playlist-item .info strong {
-            color: #00ffff;
-        }
-        .admin-playlist-item .info p {
-            color: #aaa;
-            font-size: 0.9em;
-            margin: 4px 0;
-        }
-        .admin-playlist-item .info .url {
-            color: #888;
-            font-size: 0.8em;
-            word-break: break-all;
-        }
-        .admin-playlist-item .actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
+        .admin-playlist-item .info { flex: 1; min-width: 200px; }
+        .admin-playlist-item .info strong { color: #00ffff; }
+        .admin-playlist-item .info p { color: #aaa; font-size: 0.9em; margin: 4px 0; }
+        .admin-playlist-item .info .url { color: #888; font-size: 0.8em; word-break: break-all; }
+        .admin-playlist-item .actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
+        /* ===== VÍDEOS ===== */
         .videos-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px;
         }
@@ -435,13 +787,18 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
         }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         .hidden { display: none !important; }
 
+        @media (max-width: 900px) {
+            .music-layout { flex-direction: column; }
+            .music-sidebar {
+                flex: none;
+                width: 100%;
+                max-height: 300px;
+                position: relative;
+                top: auto;
+            }
+        }
         @media (max-width: 768px) { .chat-panel { position: static; } }
     </style>
 </head>
@@ -454,9 +811,20 @@
         <p>Acesso ilimitado a todas as plataformas</p>
     </header>
 
+    <!-- ===== BANNER DE NOVIDADES ===== -->
+    <div class="news-banner" id="newsBanner">
+        <h3><span class="pulse"></span> 🆕 Novidades recentes</h3>
+        <div class="news-list" id="newsList"></div>
+    </div>
+
+    <!-- ===== BOTÕES DE ACESSO ===== -->
     <div class="access-buttons">
+        <!-- Botões para não logados (planos) -->
         <button class="btn-access active" id="btnNewCustomer" onclick="switchMode('new')">Planos VIP</button>
         <button class="btn-access" id="btnExistingCustomer" onclick="switchMode('existing')">Clientes Existentes</button>
+        <button class="btn-access" id="btnVideosPlans" onclick="switchMode('videosPlans')" style="display:inline-block;">🎬 Vídeos +18</button>
+        <button class="btn-access" id="btnMusicPlans" onclick="switchMode('musicPlans')" style="display:inline-block;">🎵 Músicas Premium</button>
+        <!-- Botões internos (logados) - inicialmente ocultos -->
         <button class="btn-access" id="btnVideos" onclick="switchMode('videos')" style="display:none;">Vídeos +18🔥🔥</button>
         <button class="btn-access" id="btnMusicas" onclick="switchMode('musicas')" style="display:none;">🎵 Músicas Premium</button>
         <button class="btn-access" id="btnAdminPlaylists" onclick="switchMode('adminPlaylists')" style="display:none;">⚙️ Gerenciar Playlists</button>
@@ -467,6 +835,7 @@
         <button onclick="logout()" style="background:#ff4444;color:#fff;border:none;padding:8px 18px;border-radius:15px;margin-left:8px;cursor:pointer;">Sair</button>
     </div>
 
+    <!-- ===== FEEDBACKS ===== -->
     <div id="feedbacksSection" class="feedbacks-section">
         <div class="feedbacks-title">Clientes Satisfeitos</div>
         <div class="testimonial-carousel" id="testimonialCarousel">
@@ -479,10 +848,12 @@
         </div>
     </div>
 
+    <!-- ===== GRADE DE PRODUTOS ===== -->
     <div id="productsGridContainer">
         <div class="products-grid" id="productsGrid"></div>
     </div>
 
+    <!-- ===== CHAT ===== -->
     <div class="chat-panel" id="chatPanel">
         <div class="chat-header">Chat Automático</div>
         <div style="padding:12px;">
@@ -497,7 +868,7 @@
     </div>
 </div>
 
-<!-- Modais -->
+<!-- ===== MODAIS ===== -->
 <div class="modal" id="pinModal">
     <div class="modal-content">
         <div style="text-align:center;margin-bottom:15px;">🔐 <h2 style="color:#00ff88;">Acesso VIP</h2></div>
@@ -531,17 +902,15 @@
     </div>
 </div>
 
-<!-- Modal de Contas -->
 <div class="modal" id="accountsModal" onclick="if(event.target === this) closeAccountsModal()">
     <div class="modal-content" style="max-width:600px; max-height:80vh; overflow-y:auto; position:relative;">
         <button class="close-modal-btn" onclick="closeAccountsModal()">✕</button>
         <h2 id="accountsModalTitle" style="color:#cc44ff; margin-bottom:15px; text-align:center;"></h2>
-        <button id="revealAllBtn" onclick="revealAllAccounts()" style="display:block; width:100%; margin-bottom:15px; padding:12px; background: linear-gradient(135deg, #ff00cc, #3333ff); color:#fff; border:none; border-radius:8px; font-weight:bold; font-size:1.1em; cursor:pointer; transition: 0.3s; box-shadow: 0 0 15px rgba(255,0,204,0.5);">✨ Revelar Todas ✨</button>
+        <button id="revealAllBtn" onclick="toggleRevealAccounts()" style="display:block; width:100%; margin-bottom:15px; padding:12px; background: linear-gradient(135deg, #ff00cc, #3333ff); color:#fff; border:none; border-radius:8px; font-weight:bold; font-size:1.1em; cursor:pointer; transition: 0.3s; box-shadow: 0 0 15px rgba(255,0,204,0.5);">✨ Revelar Todas ✨</button>
         <div id="accountsModalBody"></div>
     </div>
 </div>
 
-<!-- Modal de Vídeo +18 -->
 <div class="modal" id="videoModal" onclick="handleVideoModalClick(event)">
     <div class="video-lightbox-inner">
         <button class="video-lightbox-close" onclick="closeVideoModal()">✕</button>
@@ -553,7 +922,6 @@
     </div>
 </div>
 
-<!-- ===== MODAL DE EDIÇÃO DE PLAYLIST ===== -->
 <div class="modal" id="editPlaylistModal" onclick="if(event.target === this) closeEditModal()">
     <div class="modal-content">
         <button class="close-modal-btn" onclick="closeEditModal()">✕</button>
@@ -561,8 +929,8 @@
         <input type="hidden" id="editPlaylistId">
         <label>Título</label>
         <input type="text" id="editPlaylistTitle" placeholder="Título da playlist">
-        <label>Descrição (liste as músicas)</label>
-        <textarea id="editPlaylistDesc" rows="3" placeholder="Descrição - liste as músicas separadas por vírgula"></textarea>
+        <label>Descrição</label>
+        <textarea id="editPlaylistDesc" rows="3" placeholder="Ex: 15 músicas - lista de faixas..."></textarea>
         <label>URL do Embed</label>
         <input type="text" id="editPlaylistUrl" placeholder="https://w.soundcloud.com/player/?url=...">
         <div class="modal-actions">
@@ -572,37 +940,53 @@
     </div>
 </div>
 
-<!-- ========== ABA DE MÚSICAS PREMIUM ========== -->
+<!-- ===== ABA DE MÚSICAS PREMIUM ===== -->
 <div id="musicas" class="tab-content" style="display:none;">
     <div class="music-section">
         <h2>🎵 Músicas Premium</h2>
         <p class="subtitle" id="musicSubtitle">Assine um plano para ouvir música sem anúncios</p>
 
-        <!-- Container de planos de música (exibido se não tiver assinatura ativa) -->
         <div id="musicPlansContainer">
             <h3 style="color:#ffa500; text-align:center; margin:20px 0;">Escolha seu plano</h3>
             <div class="music-plans-grid" id="musicPlansGrid"></div>
         </div>
 
-        <!-- Container de conteúdo (playlists) exibido após assinatura -->
         <div id="musicContentContainer" class="hidden">
-            <div class="search-box">
-                <span class="icon">🔍</span>
-                <input type="text" id="playlistSearch" placeholder="Buscar por música, artista ou playlist..." oninput="filterPlaylists()">
+            <div class="toolbar">
+                <div class="info">📚 <span id="playlistCount">0</span> playlists | 🆕 <span id="newPlaylistCount">0</span> novas nas últimas 24h</div>
+                <button class="btn-refresh" id="refreshLibraryBtn" onclick="refreshLibrary()">🔄 Atualizar Biblioteca</button>
             </div>
-            <div class="playlists-grid" id="playlistsGrid"></div>
+            <div class="music-layout">
+                <div class="music-sidebar">
+                    <div class="filter-section">
+                        <h4>🎯 Gêneros</h4>
+                        <div class="filter-buttons" id="categoryBar"></div>
+                    </div>
+                    <div class="filter-section">
+                        <h4>🎤 Artistas</h4>
+                        <div class="filter-buttons" id="artistBar"></div>
+                    </div>
+                </div>
+                <div class="music-content">
+                    <div class="search-box">
+                        <span class="icon">🔍</span>
+                        <input type="text" id="playlistSearch" placeholder="Buscar por música, artista ou playlist..." oninput="filterPlaylists()">
+                    </div>
+                    <div class="playlists-grid" id="playlistsGrid"></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- ========== ADMIN - GERENCIAR PLAYLISTS ========== -->
+<!-- ===== ADMIN PLAYLISTS ===== -->
 <div id="adminPlaylists" class="tab-content" style="display:none;">
     <div style="background:rgba(0,255,255,0.05); border:2px solid #00ffff; border-radius:12px; padding:20px;">
         <h2 style="color:#00ffff; text-align:center; margin-bottom:15px;">⚙️ Gerenciar Playlists (Admin)</h2>
         <div class="admin-playlist-form">
             <h3 style="color:#00ffff; margin-bottom:10px;">Adicionar Nova Playlist</h3>
             <input type="text" id="playlistTitleInput" placeholder="Título da playlist">
-            <textarea id="playlistDescInput" placeholder="Descrição (opcional) – liste as músicas para busca" rows="2"></textarea>
+            <textarea id="playlistDescInput" placeholder="Descrição (ex: 15 músicas - artista...)" rows="2"></textarea>
             <input type="text" id="playlistUrlInput" placeholder="URL do embed (ex: https://w.soundcloud.com/player/?url=... )">
             <button onclick="addPlaylist()">➕ Adicionar</button>
         </div>
@@ -610,26 +994,28 @@
     </div>
 </div>
 
+<!-- ===== SCRIPT ===== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// ===================== CONSTANTES =====================
 const SUPABASE_URL = "https://pyzgoqmfmlmuhwmaoaou.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5emdvcW1mbWxtdWh3bWFvYW91Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwOTU3MTYsImV4cCI6MjA4MzY3MTcxNn0.FQfJyo-zxFsAO8wQw6BMTMHL6hOFK4KrbaAebj0p6hU";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const PIX_EMAIL = "gabrielcardoso.trc@gmail.com";
 const ADMIN_PIN = "633733";
-
-// Gerenciamento de dispositivo
 const DEVICE_ID_KEY = 'premium_device_id';
+const CACHE_KEY = 'premium_music_playlists';
+
 let currentDeviceId = localStorage.getItem(DEVICE_ID_KEY);
 if (!currentDeviceId) {
-  currentDeviceId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36);
-  localStorage.setItem(DEVICE_ID_KEY, currentDeviceId);
+    currentDeviceId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36);
+    localStorage.setItem(DEVICE_ID_KEY, currentDeviceId);
 }
 
 const nomes = ["Rafael","Lucas","Bruno","Pedro","Felipe","João","Marcus","Diego","André","Carlos","Gabriel","Gustavo","Rodrigo","Eduardo","Mateus","Thiago","Leonardo","Vinícius","Henrique","Daniel","Alexandre","Leandro","Fábio","Ricardo","Fernando","Marcelo","Paulo","Renato","Sérgio","Tiago","Caio","Murilo","Igor","Davi","Samuel","Otávio","Guilherme","Renan","Adriano","Cláudio","Roberto","Wellington","Anderson","Douglas","Márcio","Patrick","Julio","Evandro","Flávio","Alan","Vagner","Nilson","Emerson","Luciano","Elias","Cristiano","Walisson","Jonatan","Fabian","Alexsandro","Ana","Julia","Fernanda","Camila","Beatriz","Larissa","Mariana","Amanda","Priscila","Letícia","Isabela","Natália","Aline","Bruna","Tatiane","Vanessa","Renata","Patrícia","Débora","Giovana","Sabrina","Monique","Jéssica","Cláudia","Simone","Adriana","Michele","Viviane","Bianca","Raquel","Eliane","Sueli","Karine","Thaís","Nathalia","Flávia","Luciana","Luana","Dandara","Yasmin","Kevin","Ryan","Bryan","Willian","Erick","Cleiton","Jadson","Danilo","Rogério","Alisson","Wesley","Marcos","Edson","Valdecir","Welton","Gleisson","Jhonatan","Maikel","Claysson","Rômulo"];
 
-// Planos de contas
+// Planos para contas e também para +18 e música (valores iguais)
 const plans = [
     { id: 1, name: "1 Mês",     logo: "📺", price: "R$ 50,00",  duration: 1  },
     { id: 2, name: "3 Meses",   logo: "🎬", price: "R$ 75,00",  duration: 3  },
@@ -638,12 +1024,20 @@ const plans = [
     { id: 5, name: "Vitalício", logo: "👑", price: "R$ 500,00", duration: -1 }
 ];
 
-// Planos de música
+// Planos de música (mesmos valores)
 const musicPlans = [
     { id: 'm1', name: "Mensal",     price: "R$ 25,00",  days: 30,  logo: "🎵" },
     { id: 'm2', name: "Trimestral", price: "R$ 35,00",  days: 90,  logo: "🎶" },
     { id: 'm3', name: "Semestral",  price: "R$ 65,00",  days: 180, logo: "🎧" },
     { id: 'm4', name: "Anual",      price: "R$ 100,00", days: 365, logo: "🎼" }
+];
+
+// Planos +18 (mesmos valores)
+const videosPlans = [
+    { id: 'v1', name: "Mensal",     price: "R$ 25,00",  days: 30,  logo: "🔞" },
+    { id: 'v2', name: "Trimestral", price: "R$ 35,00",  days: 90,  logo: "🔞" },
+    { id: 'v3', name: "Semestral",  price: "R$ 65,00",  days: 180, logo: "🔞" },
+    { id: 'v4', name: "Anual",      price: "R$ 100,00", days: 365, logo: "🔞" }
 ];
 
 const autoAnswers = {
@@ -658,11 +1052,11 @@ let currentMode = "new";
 let isLoggedIn = false;
 let loggedInPin = null;
 let selectedPlan = null;
-let selectedServiceType = 'conta';
+let selectedServiceType = 'conta'; // 'conta', 'musica', 'videos'
 let proofFileData = null;
 let testimonialInterval, notificationInterval;
 
-// ---------- HELPERS ----------
+// ===================== HELPERS =====================
 function getRandomName(except = null) {
     const available = nomes.filter(n => n !== except);
     return available[Math.floor(Math.random() * available.length)];
@@ -691,7 +1085,7 @@ function getRandomMessage() {
     return messages[Math.floor(Math.random() * messages.length)];
 }
 
-// ---------- NOTIFICAÇÕES ----------
+// ===================== NOTIFICAÇÕES =====================
 function addPurchaseNotification() {
     const container = document.getElementById("purchaseNotifications");
     const notif = document.createElement("div");
@@ -708,7 +1102,7 @@ function startNotificationSpam() {
     notificationInterval = setInterval(() => addPurchaseNotification(), 6000 + Math.random()*4000);
 }
 
-// ---------- DEPOIMENTOS ----------
+// ===================== DEPOIMENTOS =====================
 function startTestimonials() {
     const nameEl = document.getElementById("testimonialName");
     const planEl = document.getElementById("testimonialPlan");
@@ -738,7 +1132,66 @@ function startTestimonials() {
     testimonialInterval = setInterval(show, 4000);
 }
 
-// ---------- MODAL DE CONTAS ----------
+// ===================== NEWS BANNER =====================
+function timeAgo(date) {
+    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+    if (seconds < 60) return 'agora mesmo';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `há ${minutes} minuto${minutes > 1 ? 's' : ''}`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `há ${hours} hora${hours > 1 ? 's' : ''}`;
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `há ${days} dia${days > 1 ? 's' : ''}`;
+    const months = Math.floor(days / 30);
+    return `há ${months} mês${months > 1 ? 'es' : ''}`;
+}
+
+async function loadNews() {
+    const banner = document.getElementById('newsBanner');
+    const list = document.getElementById('newsList');
+    try {
+        // Buscar playlists, vídeos e serviços recentes (últimos 7 dias)
+        const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        const [playlists, videos, services] = await Promise.all([
+            supabaseClient.from('playlists').select('id, title, created_at').gte('created_at', cutoff).order('created_at', { ascending: false }).limit(5),
+            supabaseClient.from('videos').select('id, title, created_at').gte('created_at', cutoff).order('created_at', { ascending: false }).limit(5),
+            supabaseClient.from('services').select('id, name, created_at').gte('created_at', cutoff).order('created_at', { ascending: false }).limit(5)
+        ]);
+
+        const items = [];
+        if (playlists.data) playlists.data.forEach(p => items.push({ type: 'playlist', title: p.title, created_at: p.created_at, icon: '🎵' }));
+        if (videos.data) videos.data.forEach(v => items.push({ type: 'video', title: v.title, created_at: v.created_at, icon: '🎬' }));
+        if (services.data) services.data.forEach(s => items.push({ type: 'service', title: s.name, created_at: s.created_at, icon: '📺' }));
+
+        items.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        const recent = items.slice(0, 5);
+
+        if (recent.length === 0) {
+            banner.classList.remove('visible');
+            return;
+        }
+
+        banner.classList.add('visible');
+        list.innerHTML = recent.map(item => `
+            <div class="news-item">
+                <span class="icon">${item.icon}</span>
+                <span>Novo${item.type === 'playlist' ? ' playlist' : item.type === 'video' ? ' vídeo' : ' serviço'}: <span class="title">${item.title}</span></span>
+                <span class="time">${timeAgo(item.created_at)}</span>
+            </div>
+        `).join('');
+
+    } catch (e) {
+        console.warn('Erro ao carregar novidades:', e);
+        banner.classList.remove('visible');
+    }
+}
+
+// Atualizar novidades a cada minuto
+setInterval(loadNews, 60000);
+
+// ===================== MODAL DE CONTAS =====================
+let isRevealed = false;
+
 async function openAccountsModal(serviceId) {
     const { data: accounts } = await supabaseClient
         .from("accounts")
@@ -775,6 +1228,7 @@ async function openAccountsModal(serviceId) {
 
             const userDisplay = acc.username ? `<strong>${acc.username}</strong><br>` : "";
 
+            // Adiciona classe blurred por padrão
             return `<div class="account-line blurred">
                 ${userDisplay}${pwDisplay}
                 ${buttonHtml}
@@ -788,23 +1242,34 @@ async function openAccountsModal(serviceId) {
     document.getElementById("accountsModal").classList.add("active");
     document.body.style.overflow = "hidden";
 
+    // Resetar estado do botão
+    isRevealed = false;
     const revealBtn = document.getElementById("revealAllBtn");
-    if (revealBtn) {
-        revealBtn.style.display = "block";
-        revealBtn.disabled = false;
-    }
+    revealBtn.textContent = "✨ Revelar Todas ✨";
+    revealBtn.style.display = "block";
+    revealBtn.style.opacity = "1";
 }
 
-function revealAllAccounts() {
+function toggleRevealAccounts() {
     const blurredLines = document.querySelectorAll("#accountsModalBody .account-line.blurred");
-    blurredLines.forEach(line => {
-        line.classList.remove("blurred");
-        line.style.filter = "none";
-    });
     const revealBtn = document.getElementById("revealAllBtn");
-    if (revealBtn) {
-        revealBtn.style.display = "none";
-        revealBtn.style.opacity = "0";
+
+    if (!isRevealed) {
+        // Revelar
+        blurredLines.forEach(line => {
+            line.classList.remove("blurred");
+            line.style.filter = "none";
+        });
+        revealBtn.textContent = "🔒 Ocultar Contas";
+        isRevealed = true;
+    } else {
+        // Ocultar
+        blurredLines.forEach(line => {
+            line.classList.add("blurred");
+            line.style.filter = "";
+        });
+        revealBtn.textContent = "✨ Revelar Todas ✨";
+        isRevealed = false;
     }
 }
 
@@ -815,9 +1280,19 @@ function copyCreds(text) {
 function closeAccountsModal() {
     document.getElementById("accountsModal").classList.remove("active");
     document.body.style.overflow = "";
+    isRevealed = false;
+    // Resetar botão para estado inicial
+    const revealBtn = document.getElementById("revealAllBtn");
+    revealBtn.textContent = "✨ Revelar Todas ✨";
 }
 
-// ---------- PLAYLISTS (COM EDIÇÃO) ----------
+// ===================== PLAYLISTS - CACHE E CONTAGEM 24H =====================
+let cachedPlaylists = null;
+let currentCategory = 'todos';
+let currentArtist = 'todos';
+let searchTimeout = null;
+let isRefreshing = false;
+
 function extractEmbedUrl(input) {
     if (!input) return '';
     if (input.startsWith('http') && input.includes('soundcloud.com/player')) {
@@ -830,99 +1305,334 @@ function extractEmbedUrl(input) {
     return input;
 }
 
-async function loadPlaylists() {
-    const { data, error } = await supabaseClient
-        .from("playlists")
-        .select("*")
-        .order("created_at", { ascending: false });
-    if (error) {
-        console.error("Erro ao carregar playlists:", error);
-        return [];
-    }
-    return data || [];
+function isNew(createdAt) {
+    if (!createdAt) return false;
+    const now = new Date();
+    const created = new Date(createdAt);
+    const diff = now - created;
+    return diff < 24 * 60 * 60 * 1000; // 24 horas
 }
 
-async function renderPlaylists() {
-    const playlists = await loadPlaylists();
-    const grid = document.getElementById("playlistsGrid");
-    if (!playlists.length) {
+function detectGenre(title, description) {
+    const text = (title + ' ' + description).toLowerCase();
+    const genreMap = {
+        'sertanejo': ['sertanejo', 'modão', 'sertaneja', 'universitário', 'moda de viola', 'dupla', 'sertanejo raiz', 'sertaneja'],
+        'forró': ['forró', 'forro', 'xote', 'baião', 'arrasta pé', 'sanfona', 'vaquejada', 'forro pé', 'forró pé'],
+        'piseiro': ['piseiro', 'vaquejada', 'piseiro'],
+        'funk': ['funk', 'proibidão', 'ostentação', 'funk carioca', 'funk 2000', 'funk anos 2000'],
+        'pop': ['pop', 'internacional', 'latin pop', 'kpop', 'pop rock', 'pop internacional'],
+        'rock': ['rock', 'metal', 'punk', 'indie', 'alternative', 'rock brasileiro', 'rock internacional'],
+        'eletrônica': ['eletrônica', 'electro', 'house', 'trance', 'techno', 'edm', 'eletronica', 'eletro'],
+        'mpb': ['mpb', 'música popular', 'brasileira', 'tropical', 'mpb'],
+        'samba': ['samba', 'partido alto', 'samba'],
+        'pagode': ['pagode', 'samba', 'pagode'],
+        'gospel': ['gospel', 'louvor', 'adoração', 'evangélico', 'cristão', 'gospel'],
+        'axé': ['axé', 'axé music', 'samba reggae', 'axé'],
+        'internacional': ['internacional', 'english', 'global', 'internacional'],
+        'hip hop': ['hip hop', 'rap', 'hip-hop', 'hiphop'],
+        'reggae': ['reggae', 'roots', 'dub', 'reggae']
+    };
+    for (const [genre, keywords] of Object.entries(genreMap)) {
+        for (const kw of keywords) {
+            if (text.includes(kw)) {
+                return genre;
+            }
+        }
+    }
+    return 'varios';
+}
+
+function detectArtist(title, description) {
+    let artist = '';
+    const separators = [' - ', ' – ', ' · ', ' / ', ' | ', ' de ', ' por '];
+    let found = false;
+    for (const sep of separators) {
+        if (title.includes(sep)) {
+            const parts = title.split(sep);
+            const candidate = parts[0].trim();
+            if (candidate.length > 1 && candidate.length < 40 && !candidate.toLowerCase().includes('playlist') && !candidate.toLowerCase().includes('álbum')) {
+                artist = candidate;
+                found = true;
+                break;
+            } else {
+                const candidate2 = parts[1].trim();
+                if (candidate2.length > 1 && candidate2.length < 40 && !candidate2.toLowerCase().includes('playlist') && !candidate2.toLowerCase().includes('álbum')) {
+                    artist = candidate2;
+                    found = true;
+                    break;
+                }
+            }
+        }
+    }
+    if (!found) {
+        const reversed = title.split(' - ');
+        if (reversed.length > 1 && reversed[reversed.length-1].length < 40) {
+            artist = reversed[reversed.length-1].trim();
+        } else {
+            if (title.length < 50 && !title.toLowerCase().includes('playlist') && !title.toLowerCase().includes('álbum')) {
+                artist = title.trim();
+            } else {
+                artist = 'Vários Artistas';
+            }
+        }
+    }
+    return artist;
+}
+
+function getGenreIcon(genre) {
+    const icons = {
+        'sertanejo': '🎸',
+        'forró': '🪗',
+        'piseiro': '🎵',
+        'pagode': '🎶',
+        'funk': '🔥',
+        'pop': '🎤',
+        'rock': '🤘',
+        'eletrônica': '💿',
+        'mpb': '🎷',
+        'internacional': '🌎',
+        'gospel': '🙏',
+        'axé': '🥁',
+        'hip hop': '🎧',
+        'reggae': '🌿',
+        'varios': '🎵'
+    };
+    return icons[genre] || '🎵';
+}
+
+async function loadPlaylists(forceRefresh = false) {
+    if (isRefreshing) return;
+
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (!forceRefresh && cached) {
+        try {
+            const parsed = JSON.parse(cached);
+            if (parsed && Array.isArray(parsed) && parsed.length > 0) {
+                cachedPlaylists = parsed;
+                return;
+            }
+        } catch (e) {
+            console.warn('Cache corrompido, recarregando...');
+        }
+    }
+
+    isRefreshing = true;
+    document.getElementById('playlistsGrid').innerHTML = `
+        <div class="loading-spinner" style="grid-column:1/-1;">
+            <div class="spinner"></div>
+            <p style="margin-top:10px;">Carregando biblioteca...</p>
+        </div>
+    `;
+
+    try {
+        const { data, error } = await supabaseClient
+            .from("playlists")
+            .select("*")
+            .order("created_at", { ascending: false });
+        if (error) throw error;
+
+        const enriched = (data || []).map(p => {
+            const genre = detectGenre(p.title, p.description || '');
+            const artist = detectArtist(p.title, p.description || '');
+            return { ...p, _genre: genre, _artist: artist, _isNew: isNew(p.created_at) };
+        });
+
+        localStorage.setItem(CACHE_KEY, JSON.stringify(enriched));
+        cachedPlaylists = enriched;
+    } catch (error) {
+        console.error('Erro ao carregar playlists:', error);
+        alert('Erro ao carregar biblioteca. Tente novamente.');
+        cachedPlaylists = [];
+    } finally {
+        isRefreshing = false;
+    }
+}
+
+async function refreshLibrary() {
+    const btn = document.getElementById('refreshLibraryBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Carregando...';
+    try {
+        localStorage.removeItem(CACHE_KEY);
+        await loadPlaylists(true);
+        renderCategories();
+        renderArtists();
+        applyFilters();
+        updateStats();
+        // Atualizar também o banner de novidades
+        loadNews();
+        alert('✅ Biblioteca atualizada com sucesso!');
+    } catch (e) {
+        alert('Erro ao atualizar: ' + e.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '🔄 Atualizar Biblioteca';
+    }
+}
+
+function updateStats() {
+    const total = cachedPlaylists ? cachedPlaylists.length : 0;
+    const newCount = cachedPlaylists ? cachedPlaylists.filter(p => p._isNew).length : 0;
+    document.getElementById('playlistCount').textContent = total;
+    document.getElementById('newPlaylistCount').textContent = newCount;
+}
+
+function renderCategories() {
+    const bar = document.getElementById('categoryBar');
+    if (!cachedPlaylists || cachedPlaylists.length === 0) {
+        bar.innerHTML = '';
+        return;
+    }
+    const allGenres = new Set();
+    cachedPlaylists.forEach(p => allGenres.add(p._genre));
+    let html = `<button class="category-btn ${currentCategory === 'todos' ? 'active' : ''}" onclick="setCategory('todos')">🎯 Todos</button>`;
+    const sorted = Array.from(allGenres).sort();
+    sorted.forEach(genre => {
+        const icon = getGenreIcon(genre);
+        const displayName = genre === 'varios' ? 'Vários' : genre.charAt(0).toUpperCase() + genre.slice(1);
+        html += `<button class="category-btn ${currentCategory === genre ? 'active' : ''}" onclick="setCategory('${genre}')">${icon} ${displayName}</button>`;
+    });
+    bar.innerHTML = html;
+}
+
+function renderArtists() {
+    const bar = document.getElementById('artistBar');
+    if (!cachedPlaylists || cachedPlaylists.length === 0) {
+        bar.innerHTML = '';
+        return;
+    }
+    const allArtists = new Set();
+    cachedPlaylists.forEach(p => allArtists.add(p._artist));
+    if (allArtists.size === 0 || allArtists.size === 1 && allArtists.has('Vários Artistas')) {
+        bar.innerHTML = '';
+        return;
+    }
+    let html = `<button class="artist-btn ${currentArtist === 'todos' ? 'active' : ''}" onclick="setArtist('todos')">🎤 Todos</button>`;
+    const sorted = Array.from(allArtists).filter(a => a !== 'Vários Artistas').sort();
+    sorted.forEach(artist => {
+        html += `<button class="artist-btn ${currentArtist === artist ? 'active' : ''}" onclick="setArtist('${artist.replace(/'/g, "\\'")}')">${artist}</button>`;
+    });
+    if (allArtists.has('Vários Artistas')) {
+        html += `<button class="artist-btn ${currentArtist === 'Vários Artistas' ? 'active' : ''}" onclick="setArtist('Vários Artistas')">🎵 Vários</button>`;
+    }
+    bar.innerHTML = html;
+}
+
+function applyFilters() {
+    const grid = document.getElementById('playlistsGrid');
+    if (!cachedPlaylists || cachedPlaylists.length === 0) {
         grid.innerHTML = `
             <div style="grid-column:1/-1; text-align:center; padding:30px; color:#aaa;">
                 <span style="font-size:2em;">🎶</span>
-                <p style="margin-top:10px;">Nenhuma playlist cadastrada ainda.</p>
-                <p style="font-size:0.9em; color:#666;">Em breve teremos novidades!</p>
+                <p style="margin-top:10px;">Nenhuma playlist disponível.</p>
+                <button class="btn-refresh" onclick="refreshLibrary()" style="margin-top:10px;">🔄 Carregar Biblioteca</button>
             </div>
         `;
         return;
     }
-    grid.innerHTML = playlists.map(p => {
+
+    let filtered = cachedPlaylists;
+    if (currentCategory !== 'todos') {
+        filtered = filtered.filter(p => p._genre === currentCategory);
+    }
+    if (currentArtist !== 'todos') {
+        filtered = filtered.filter(p => p._artist === currentArtist);
+    }
+    const search = document.getElementById('playlistSearch')?.value.toLowerCase().trim() || '';
+    if (search) {
+        filtered = filtered.filter(p => {
+            const title = p.title.toLowerCase();
+            const desc = p.description ? p.description.toLowerCase() : '';
+            const artist = p._artist.toLowerCase();
+            return title.includes(search) || desc.includes(search) || artist.includes(search);
+        });
+    }
+
+    if (!filtered.length) {
+        grid.innerHTML = `
+            <div style="grid-column:1/-1; text-align:center; padding:30px; color:#aaa;">
+                <span style="font-size:2em;">🔍</span>
+                <p style="margin-top:10px;">Nenhuma playlist encontrada com estes filtros.</p>
+                <p style="font-size:0.9em; color:#666;">Tente ajustar os filtros ou buscar outro termo.</p>
+            </div>
+        `;
+        return;
+    }
+
+    grid.innerHTML = filtered.map(p => {
         const embedUrl = extractEmbedUrl(p.embed_url);
+        const genreIcon = getGenreIcon(p._genre);
+        const genreDisplay = p._genre === 'varios' ? 'Vários' : p._genre.charAt(0).toUpperCase() + p._genre.slice(1);
+        const isNewClass = p._isNew ? 'neon-new' : '';
+        const isNewLabel = p._isNew ? '<span class="neon-new" style="position:absolute;top:-8px;right:-8px;background:#ff00cc;color:#fff;font-size:0.6em;padding:2px 10px;border-radius:12px;box-shadow:0 0 15px #ff00cc;z-index:10;">NOVO</span>' : '';
         if (!embedUrl || !embedUrl.startsWith('http')) {
             return `
-                <div class="playlist-card">
+                <div class="playlist-card ${isNewClass}" style="position:relative;">
+                    ${isNewLabel}
                     <div class="card-header">
                         <h3>${p.title}</h3>
+                        <span class="card-genre">${genreIcon} ${genreDisplay}</span>
                     </div>
+                    <div class="card-artist">👤 ${p._artist}</div>
                     <div class="card-desc">${p.description || ''}</div>
                     <div style="color:#ff4444; font-size:0.9em; padding:10px; background:#1a0000; border-radius:6px;">
-                        ⚠️ URL do embed inválida. Verifique o cadastro.
+                        ⚠️ URL do embed inválida.
                     </div>
                 </div>
             `;
         }
         return `
-            <div class="playlist-card">
+            <div class="playlist-card ${isNewClass}" style="position:relative;">
+                ${isNewLabel}
                 <div class="card-header">
                     <h3>${p.title}</h3>
+                    <span class="card-genre">${genreIcon} ${genreDisplay}</span>
                 </div>
+                <div class="card-artist">👤 ${p._artist}</div>
                 <div class="card-desc">${p.description || ''}</div>
                 <iframe src="${embedUrl}" 
                         frameborder="0" 
                         allow="autoplay; encrypted-media" 
                         loading="lazy"
-                        height="400">
+                        height="300">
                 </iframe>
             </div>
         `;
     }).join('');
 }
 
-function filterPlaylists() {
-    const search = document.getElementById('playlistSearch').value.toLowerCase().trim();
-    const cards = document.querySelectorAll('.playlist-card');
-    let hasVisible = false;
-
-    cards.forEach(card => {
-        const title = card.querySelector('h3')?.textContent?.toLowerCase() || '';
-        const desc = card.querySelector('.card-desc')?.textContent?.toLowerCase() || '';
-
-        // Divide a descrição em palavras-chave (separadas por vírgula ou quebra de linha)
-        const keywords = desc.split(/[,;\n]/).map(k => k.trim().toLowerCase()).filter(k => k.length > 0);
-        const fullText = title + ' ' + desc;
-
-        // Verifica se a busca está no título, na descrição ou em alguma palavra-chave
-        const match = fullText.includes(search) || keywords.some(k => k.includes(search) || search.includes(k));
-
-        card.style.display = match ? 'block' : 'none';
-        if (match) hasVisible = true;
-    });
-
-    const grid = document.getElementById('playlistsGrid');
-    const noResult = grid.querySelector('.no-result');
-    if (!hasVisible) {
-        if (!noResult) {
-            const msg = document.createElement('div');
-            msg.className = 'no-result';
-            msg.style.cssText = 'grid-column:1/-1; text-align:center; padding:20px; color:#aaa;';
-            msg.innerHTML = '<span style="font-size:2em;">🔍</span><p>Nenhuma música encontrada para: <strong>"' + search + '"</strong></p>';
-            grid.appendChild(msg);
+function setCategory(genre) {
+    currentCategory = genre;
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.remove('active');
+        const txt = btn.textContent.toLowerCase();
+        if ((genre === 'todos' && txt.includes('todos')) || txt.includes(genre)) {
+            btn.classList.add('active');
         }
-    } else {
-        if (noResult) noResult.remove();
-    }
+    });
+    applyFilters();
 }
 
-// ---------- ADMIN PLAYLISTS (COM EDIÇÃO) ----------
+function setArtist(artist) {
+    currentArtist = artist;
+    document.querySelectorAll('.artist-btn').forEach(btn => {
+        btn.classList.remove('active');
+        const txt = btn.textContent;
+        if ((artist === 'todos' && txt.includes('Todos')) || txt === artist) {
+            btn.classList.add('active');
+        }
+    });
+    applyFilters();
+}
+
+function filterPlaylists() {
+    if (searchTimeout) clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        applyFilters();
+    }, 300);
+}
+
+// ===================== ADMIN PLAYLISTS =====================
 async function addPlaylist() {
     const title = document.getElementById('playlistTitleInput').value.trim();
     const description = document.getElementById('playlistDescInput').value.trim();
@@ -948,8 +1658,14 @@ async function addPlaylist() {
     document.getElementById('playlistDescInput').value = '';
     document.getElementById('playlistUrlInput').value = '';
 
+    localStorage.removeItem(CACHE_KEY);
+    await loadPlaylists(true);
     await renderAdminPlaylists();
-    await renderPlaylists();
+    renderCategories();
+    renderArtists();
+    applyFilters();
+    updateStats();
+    loadNews(); // atualiza banner
 }
 
 async function deletePlaylist(id) {
@@ -962,21 +1678,25 @@ async function deletePlaylist(id) {
         alert('Erro ao remover: ' + error.message);
         return;
     }
+    localStorage.removeItem(CACHE_KEY);
+    await loadPlaylists(true);
     await renderAdminPlaylists();
-    await renderPlaylists();
+    renderCategories();
+    renderArtists();
+    applyFilters();
+    updateStats();
+    loadNews();
 }
 
-// --- Funções de edição ---
 function openEditModal(id) {
-    const playlist = document.querySelector(`.admin-playlist-item[data-id="${id}"]`);
-    if (!playlist) {
-        // Se não encontrar no DOM, recarregar a lista e tentar novamente
+    const item = document.querySelector(`.admin-playlist-item[data-id="${id}"]`);
+    if (!item) {
         renderAdminPlaylists().then(() => {
-            const p = document.querySelector(`.admin-playlist-item[data-id="${id}"]`);
-            if (p) {
-                const title = p.querySelector('.info .title')?.textContent || '';
-                const desc = p.querySelector('.info .desc')?.textContent || '';
-                const url = p.querySelector('.info .url')?.textContent || '';
+            const el = document.querySelector(`.admin-playlist-item[data-id="${id}"]`);
+            if (el) {
+                const title = el.querySelector('.info .title')?.textContent || '';
+                const desc = el.querySelector('.info .desc')?.textContent || '';
+                const url = el.querySelector('.info .url')?.textContent || '';
                 document.getElementById('editPlaylistId').value = id;
                 document.getElementById('editPlaylistTitle').value = title;
                 document.getElementById('editPlaylistDesc').value = desc;
@@ -986,9 +1706,9 @@ function openEditModal(id) {
         });
         return;
     }
-    const title = playlist.querySelector('.info .title')?.textContent || '';
-    const desc = playlist.querySelector('.info .desc')?.textContent || '';
-    const url = playlist.querySelector('.info .url')?.textContent || '';
+    const title = item.querySelector('.info .title')?.textContent || '';
+    const desc = item.querySelector('.info .desc')?.textContent || '';
+    const url = item.querySelector('.info .url')?.textContent || '';
     document.getElementById('editPlaylistId').value = id;
     document.getElementById('editPlaylistTitle').value = title;
     document.getElementById('editPlaylistDesc').value = desc;
@@ -1024,19 +1744,24 @@ async function saveEditPlaylist() {
     }
 
     closeEditModal();
+    localStorage.removeItem(CACHE_KEY);
+    await loadPlaylists(true);
     await renderAdminPlaylists();
-    await renderPlaylists();
+    renderCategories();
+    renderArtists();
+    applyFilters();
+    updateStats();
+    loadNews();
 }
 
-// --- Renderização da lista admin com botão Editar ---
 async function renderAdminPlaylists() {
-    const playlists = await loadPlaylists();
+    await loadPlaylists(true);
     const container = document.getElementById('adminPlaylistsList');
-    if (!playlists.length) {
+    if (!cachedPlaylists || cachedPlaylists.length === 0) {
         container.innerHTML = '<p style="color:#aaa;">Nenhuma playlist cadastrada.</p>';
         return;
     }
-    container.innerHTML = playlists.map(p => `
+    container.innerHTML = cachedPlaylists.map(p => `
         <div class="admin-playlist-item" data-id="${p.id}">
             <div class="info">
                 <strong class="title">${p.title}</strong>
@@ -1051,7 +1776,7 @@ async function renderAdminPlaylists() {
     `).join('');
 }
 
-// ---------- PLANOS DE MÚSICA ----------
+// ===================== PLANOS DE MÚSICA E VÍDEOS =====================
 function renderMusicPlans() {
     const grid = document.getElementById('musicPlansGrid');
     grid.innerHTML = musicPlans.map(p => `
@@ -1065,6 +1790,31 @@ function renderMusicPlans() {
     `).join('');
 }
 
+function renderVideosPlans() {
+    const grid = document.getElementById('productsGrid');
+    grid.innerHTML = '';
+    grid.className = 'products-grid';
+    videosPlans.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+            <div class="product-header">
+                <div class="product-logo">${p.logo}</div>
+                <h2 class="product-name">${p.name}</h2>
+                <div class="product-price">${p.price}</div>
+                <div class="product-price-label">${p.days} dias</div>
+            </div>
+            <div class="benefits-list">
+                <div class="benefit-item">🔞 Conteúdo +18</div>
+                <div class="benefit-item">🎥 Acesso ilimitado</div>
+                <div class="benefit-item">📱 Compatível com todos</div>
+            </div>
+            <button class="btn btn-buy" onclick="buyVideosPlan('${p.id}')">Assinar Agora</button>
+        `;
+        grid.appendChild(card);
+    });
+}
+
 function buyMusicPlan(planId) {
     const plan = musicPlans.find(p => p.id === planId);
     if (!plan) return;
@@ -1074,7 +1824,16 @@ function buyMusicPlan(planId) {
     document.getElementById("pixModal").classList.add("active");
 }
 
-// ---------- COMPRAS ----------
+function buyVideosPlan(planId) {
+    const plan = videosPlans.find(p => p.id === planId);
+    if (!plan) return;
+    selectedPlan = { id: plan.id, name: plan.name, price: plan.price, days: plan.days };
+    selectedServiceType = 'videos';
+    document.getElementById("planInfo").textContent = `🔞 ${plan.name} - ${plan.price}`;
+    document.getElementById("pixModal").classList.add("active");
+}
+
+// ===================== COMPRAS =====================
 function buyPlan(planId) {
     selectedPlan = plans.find(p => p.id === planId);
     selectedServiceType = 'conta';
@@ -1107,7 +1866,7 @@ async function confirmPayment() {
         proof_data: proofFileData.data || null,
         purchase_date: new Date().toISOString(),
         service_type: selectedServiceType,
-        music_plan_days: selectedServiceType === 'musica' ? days : null
+        music_plan_days: (selectedServiceType === 'musica' || selectedServiceType === 'videos') ? days : null
     };
 
     const { error } = await supabaseClient.from("purchases").insert(insertData);
@@ -1138,146 +1897,156 @@ function showAutoAnswer(q) {
     document.getElementById("chatMessages").innerHTML = `<div style="background:#00ff88;color:#0a0a0a;padding:10px;border-radius:8px;">${autoAnswers[q]}</div>`;
 }
 
-// ---------- RENDERIZAÇÃO PRINCIPAL ----------
-async function renderProducts(purchaseFromPin = null) {
+// ===================== RENDERIZAÇÃO PRINCIPAL =====================
+function renderProducts() {
     const grid = document.getElementById("productsGrid");
     grid.innerHTML = "";
-    grid.className = (currentMode === "videos") ? "videos-grid" : "products-grid";
+    grid.className = "products-grid";
+
+    // Se estiver no modo "existing" e logado, usar renderLoggedInProducts
+    if (currentMode === "existing" && isLoggedIn) {
+        renderLoggedInProducts();
+        return;
+    }
 
     if (currentMode === "new") {
-        const { data: services } = await supabaseClient.from("services").select("name, emoji").order("created_at", { ascending: false });
-        const serviceList = services || [];
-        const benefitItems = serviceList.map(s => `<div class="benefit-item">${s.emoji||"📺"} ${s.name}</div>`).join("");
+        // Planos VIP padrão (contas)
+        supabaseClient.from("services").select("name, emoji").order("created_at", { ascending: false })
+            .then(({ data: services, error }) => {
+                if (error) return;
+                const serviceList = services || [];
+                const benefitItems = serviceList.map(s => `<div class="benefit-item">${s.emoji||"📺"} ${s.name}</div>`).join("");
+                plans.forEach(plan => {
+                    const card = document.createElement("div");
+                    card.className = "product-card" + (plan.name === "6 Meses" ? " best-offer" : "");
+                    card.innerHTML = `
+                        ${plan.name === "6 Meses" ? '<div class="best-offer-badge">MELHOR OFERTA</div>' : ''}
+                        <div class="product-header">
+                            <div class="product-logo">${plan.logo}</div>
+                            <h2 class="product-name">${plan.name}</h2>
+                            <div class="product-price">${plan.price}</div>
+                            <div class="product-price-label">${plan.duration === -1 ? "Para Sempre" : `${plan.duration} meses`}</div>
+                        </div>
+                        <div class="benefits-list">${benefitItems || '<div style="color:#aaffcc;">Serviços em breve</div>'}</div>
+                        <button class="btn btn-buy" onclick="buyPlan(${plan.id})">Comprar Agora</button>
+                    `;
+                    grid.appendChild(card);
+                });
+            });
+        return;
+    }
 
-        plans.forEach(plan => {
-            const card = document.createElement("div");
-            card.className = "product-card" + (plan.name === "6 Meses" ? " best-offer" : "");
+    if (currentMode === "videosPlans") {
+        renderVideosPlans();
+        return;
+    }
+
+    if (currentMode === "musicPlans") {
+        // Mostrar planos de música na grade
+        grid.innerHTML = '';
+        musicPlans.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'product-card';
             card.innerHTML = `
-                ${plan.name === "6 Meses" ? '<div class="best-offer-badge">MELHOR OFERTA</div>' : ''}
                 <div class="product-header">
-                    <div class="product-logo">${plan.logo}</div>
-                    <h2 class="product-name">${plan.name}</h2>
-                    <div class="product-price">${plan.price}</div>
-                    <div class="product-price-label">${plan.duration === -1 ? "Para Sempre" : `${plan.duration} meses`}</div>
+                    <div class="product-logo">${p.logo}</div>
+                    <h2 class="product-name">${p.name}</h2>
+                    <div class="product-price">${p.price}</div>
+                    <div class="product-price-label">${p.days} dias</div>
                 </div>
-                <div class="benefits-list">${benefitItems || '<div style="color:#aaffcc;">Serviços em breve</div>'}</div>
-                <button class="btn btn-buy" onclick="buyPlan(${plan.id})">Comprar Agora</button>
+                <div class="benefits-list">
+                    <div class="benefit-item">🎵 Músicas sem anúncios</div>
+                    <div class="benefit-item">📀 Playlists exclusivas</div>
+                    <div class="benefit-item">📱 Compatível com todos</div>
+                </div>
+                <button class="btn btn-buy" onclick="buyMusicPlan('${p.id}')">Assinar Agora</button>
             `;
             grid.appendChild(card);
         });
-        return;
-    }
-
-    if (currentMode === "existing" && isLoggedIn) {
-        const { data: services } = await supabaseClient.from("services").select("*").order("created_at", { ascending: false });
-        if (!services?.length) {
-            grid.innerHTML = '<p style="color:#ccc;text-align:center;padding:30px;">Nenhum serviço disponível.</p>';
-            return;
-        }
-
-        let userPurchase = null;
-        if (loggedInPin !== ADMIN_PIN) {
-            const { data } = await supabaseClient
-                .from("purchases")
-                .select("*")
-                .eq("pin", loggedInPin)
-                .eq("service_type", "conta")
-                .eq("status", "approved")
-                .maybeSingle();
-            userPurchase = data;
-            if (userPurchase && userPurchase.plan_name !== "Vitalício" && userPurchase.expiry_date && new Date(userPurchase.expiry_date) < new Date()) {
-                alert("Sua conta expirou! Entre em contato para renovar.");
-                logout();
-                return;
-            }
-        }
-
-        if (loggedInPin !== ADMIN_PIN && userPurchase) {
-            const expirou = userPurchase.expiry_date ? new Date(userPurchase.expiry_date).toLocaleString("pt-BR") : "—";
-            const expiracaoTexto = userPurchase.plan_name === "Vitalício" ? "Vitalício (sem expiração)" : expirou;
-            const infoDiv = document.createElement("div");
-            infoDiv.style = "text-align:center;margin-bottom:20px;grid-column:1/-1;";
-            infoDiv.innerHTML = `<div style="background:rgba(76,175,80,0.1);border:2px solid #4caf50;color:#81c784;padding:12px;border-radius:8px;"><strong>✅ Acesso Ativo</strong><br>Plano: ${userPurchase.plan_name}<br>Expira em: ${expiracaoTexto}</div>`;
-            grid.appendChild(infoDiv);
-        }
-
-        const titleDiv = document.createElement("div");
-        titleDiv.innerHTML = '<h2 style="grid-column:1/-1;text-align:center;color:#cc44ff;margin-bottom:15px;">Todas as Contas Disponíveis</h2>';
-        grid.appendChild(titleDiv);
-
-        services.forEach(svc => {
-            const card = document.createElement("div");
-            card.className = "product-card";
-            card.style.textAlign = "center";
-            card.innerHTML = `
-                <div class="product-header">
-                    <span class="product-logo">${svc.emoji||"📺"}</span>
-                    <h2 class="product-name">${svc.name}</h2>
-                </div>
-                <button class="btn btn-show-accounts" onclick="openAccountsModal('${svc.id}')">Mostrar Contas</button>
-            `;
-            grid.appendChild(card);
-        });
-        return;
-    }
-
-    // VÍDEOS +18
-    if (currentMode === "videos" && isLoggedIn) {
-        const { data: videos } = await supabaseClient.from("videos").select("*").order("created_at", { ascending: false });
-        if (!videos || videos.length === 0) {
-            grid.innerHTML = '<p style="color:#888;text-align:center;padding:30px;">Nenhum vídeo disponível.</p>';
-            return;
-        }
-
-        grid.className = "videos-grid";
-        const titleDiv = document.createElement("div");
-        titleDiv.style.gridColumn = "1 / -1";
-        titleDiv.style.textAlign = "center";
-        titleDiv.style.marginBottom = "10px";
-        titleDiv.innerHTML = '<h2 style="color:#ff2244; font-size:1.6em;">🎥 Vídeos +18 Em Alta🔥🔥</h2>';
-        grid.appendChild(titleDiv);
-
-        videos.forEach(v => {
-            const card = document.createElement("div");
-            card.className = "video-thumb-card";
-            let embedUrl = v.url;
-            if (v.url.includes("youtube.com/watch?v=")) {
-                const vid = v.url.split("v=")[1]?.split("&")[0];
-                if (vid) embedUrl = `https://www.youtube.com/embed/${vid}`;
-            } else if (v.url.includes("youtu.be/")) {
-                const vid = v.url.split("youtu.be/")[1]?.split("?")[0];
-                if (vid) embedUrl = `https://www.youtube.com/embed/${vid}`;
-            }
-            card.innerHTML = `
-                <div class="video-thumb-poster">
-                    <iframe src="${embedUrl}" loading="lazy" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
-                    <div class="play-icon">▶</div>
-                </div>
-                <div class="video-thumb-info">
-                    <div class="video-thumb-title">${v.title}</div>
-                    <div class="video-thumb-category">📂 ${v.category || 'Sem categoria'}</div>
-                </div>`;
-            card.addEventListener("click", () => openVideoModal(v.url, v.title));
-            grid.appendChild(card);
-        });
-        return;
-    }
-
-    // ===== MÚSICAS =====
-    if (currentMode === "musicas" && isLoggedIn) {
-        grid.innerHTML = `
-            <div style="grid-column:1/-1; text-align:center; padding:20px; color:#ffa500;">
-                <h2>🎵 Músicas Premium</h2>
-                <p>Playlists disponíveis na aba acima.</p>
-            </div>
-        `;
         return;
     }
 
     grid.className = "products-grid";
 }
 
-// ---------- ABA DE MÚSICA ----------
+// ===================== RENDER PARA CLIENTES LOGADOS =====================
+async function renderLoggedInProducts() {
+    const grid = document.getElementById("productsGrid");
+    grid.innerHTML = "";
+    grid.className = "products-grid";
+
+    // Buscar serviços (contas) para cliente existente
+    const { data: services } = await supabaseClient.from("services").select("*").order("created_at", { ascending: false });
+    if (!services?.length) {
+        grid.innerHTML = '<p style="color:#ccc;text-align:center;padding:30px;">Nenhum serviço disponível.</p>';
+        return;
+    }
+
+    let userPurchase = null;
+    if (loggedInPin !== ADMIN_PIN) {
+        const { data } = await supabaseClient
+            .from("purchases")
+            .select("*")
+            .eq("pin", loggedInPin)
+            .eq("service_type", "conta")
+            .eq("status", "approved")
+            .maybeSingle();
+        userPurchase = data;
+        if (userPurchase && userPurchase.plan_name !== "Vitalício" && userPurchase.expiry_date && new Date(userPurchase.expiry_date) < new Date()) {
+            alert("Sua conta expirou! Entre em contato para renovar.");
+            logout();
+            return;
+        }
+    }
+
+    if (loggedInPin !== ADMIN_PIN && userPurchase) {
+        const expirou = userPurchase.expiry_date ? new Date(userPurchase.expiry_date).toLocaleString("pt-BR") : "—";
+        const expiracaoTexto = userPurchase.plan_name === "Vitalício" ? "Vitalício (sem expiração)" : expirou;
+        const infoDiv = document.createElement("div");
+        infoDiv.style = "text-align:center;margin-bottom:20px;grid-column:1/-1;";
+        infoDiv.innerHTML = `<div style="background:rgba(76,175,80,0.1);border:2px solid #4caf50;color:#81c784;padding:12px;border-radius:8px;"><strong>✅ Acesso Ativo</strong><br>Plano: ${userPurchase.plan_name}<br>Expira em: ${expiracaoTexto}</div>`;
+        grid.appendChild(infoDiv);
+    }
+
+    const titleDiv = document.createElement("div");
+    titleDiv.innerHTML = '<h2 style="grid-column:1/-1;text-align:center;color:#cc44ff;margin-bottom:15px;">Todas as Contas Disponíveis</h2>';
+    grid.appendChild(titleDiv);
+
+    services.forEach(svc => {
+        const card = document.createElement("div");
+        card.className = "product-card";
+        card.style.textAlign = "center";
+        card.innerHTML = `
+            <div class="product-header">
+                <span class="product-logo">${svc.emoji||"📺"}</span>
+                <h2 class="product-name">${svc.name}</h2>
+            </div>
+            <button class="btn btn-show-accounts" onclick="openAccountsModal('${svc.id}')">Mostrar Contas</button>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+// ===================== CONTEÚDO DE MÚSICA =====================
+async function renderMusicContent() {
+    await loadPlaylists(false);
+    if (!cachedPlaylists || cachedPlaylists.length === 0) {
+        document.getElementById('playlistsGrid').innerHTML = `
+            <div style="grid-column:1/-1; text-align:center; padding:30px; color:#aaa;">
+                <span style="font-size:2em;">🎶</span>
+                <p style="margin-top:10px;">Nenhuma playlist cadastrada ainda.</p>
+                <button class="btn-refresh" onclick="refreshLibrary()" style="margin-top:10px;">🔄 Carregar Biblioteca</button>
+            </div>
+        `;
+        return;
+    }
+    renderCategories();
+    renderArtists();
+    applyFilters();
+    updateStats();
+}
+
+// ===================== ABA DE MÚSICA =====================
 async function renderMusicTab() {
     const subtitle = document.getElementById("musicSubtitle");
     const plansContainer = document.getElementById("musicPlansContainer");
@@ -1328,7 +2097,7 @@ async function renderMusicTab() {
             ${planPrice ? `(${planPrice})` : ''} 
             | Vencimento: <strong style="color:#ffa500;">${expiryDate}</strong>
         `;
-        renderPlaylists();
+        await renderMusicContent();
     } else {
         plansContainer.classList.remove("hidden");
         contentContainer.classList.add("hidden");
@@ -1337,7 +2106,7 @@ async function renderMusicTab() {
     }
 }
 
-// ---------- VÍDEO MODAL (+18) ----------
+// ===================== VÍDEO MODAL =====================
 function openVideoModal(url, title, category) {
     document.getElementById("videoModalTitle").textContent = title || "";
     document.getElementById("videoModalCategory").textContent = category ? `📂 ${category}` : "";
@@ -1360,135 +2129,255 @@ function closeVideoModal() {
 }
 function handleVideoModalClick(e) { if (e.target === document.getElementById("videoModal")) closeVideoModal(); }
 
-// ---------- AUTENTICAÇÃO ----------
-async function validatePin() {
-  const pin = document.getElementById("pinInput").value.trim();
-  if (pin.length !== 6) { alert("PIN inválido!"); return; }
+// ===================== VÍDEOS +18 =====================
+async function renderVideosContent() {
+    const grid = document.getElementById("productsGrid");
+    grid.innerHTML = "";
+    grid.className = "videos-grid";
 
-  if (pin === ADMIN_PIN) {
-    const { data: config, error: configError } = await supabaseClient
-      .from("admin_config")
-      .select("*")
-      .eq("id", 1)
-      .maybeSingle();
-    if (configError || !config) {
-      alert("Erro ao verificar configuração de administrador.");
-      return;
+    const { data: videos } = await supabaseClient.from("videos").select("*").order("created_at", { ascending: false });
+    if (!videos || videos.length === 0) {
+        grid.innerHTML = '<p style="color:#888;text-align:center;padding:30px;">Nenhum vídeo disponível.</p>';
+        return;
     }
-    if (config.is_blocked) {
-      alert("⛔ Acesso de administrador temporariamente bloqueado.");
-      return;
+
+    const titleDiv = document.createElement("div");
+    titleDiv.style.gridColumn = "1 / -1";
+    titleDiv.style.textAlign = "center";
+    titleDiv.style.marginBottom = "10px";
+    titleDiv.innerHTML = '<h2 style="color:#ff2244; font-size:1.6em;">🎥 Vídeos +18 Em Alta🔥🔥</h2>';
+    grid.appendChild(titleDiv);
+
+    videos.forEach(v => {
+        const card = document.createElement("div");
+        card.className = "video-thumb-card";
+        let embedUrl = v.url;
+        if (v.url.includes("youtube.com/watch?v=")) {
+            const vid = v.url.split("v=")[1]?.split("&")[0];
+            if (vid) embedUrl = `https://www.youtube.com/embed/${vid}`;
+        } else if (v.url.includes("youtu.be/")) {
+            const vid = v.url.split("youtu.be/")[1]?.split("?")[0];
+            if (vid) embedUrl = `https://www.youtube.com/embed/${vid}`;
+        }
+        const isNewVideo = isNew(v.created_at);
+        const newClass = isNewVideo ? 'neon-new' : '';
+        const newLabel = isNewVideo ? '<span class="neon-new" style="position:absolute;top:-8px;right:-8px;background:#ff00cc;color:#fff;font-size:0.6em;padding:2px 10px;border-radius:12px;box-shadow:0 0 15px #ff00cc;z-index:10;">NOVO</span>' : '';
+        card.innerHTML = `
+            <div class="${newClass}" style="position:relative;">
+                ${newLabel}
+                <div class="video-thumb-poster">
+                    <iframe src="${embedUrl}" loading="lazy" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
+                    <div class="play-icon">▶</div>
+                </div>
+                <div class="video-thumb-info">
+                    <div class="video-thumb-title">${v.title}</div>
+                    <div class="video-thumb-category">📂 ${v.category || 'Sem categoria'}</div>
+                </div>
+            </div>
+        `;
+        card.addEventListener("click", () => openVideoModal(v.url, v.title));
+        grid.appendChild(card);
+    });
+}
+
+// ===================== AUTENTICAÇÃO =====================
+async function validatePin() {
+    const pin = document.getElementById("pinInput").value.trim();
+    if (pin.length !== 6) { alert("PIN inválido!"); return; }
+
+    if (pin === ADMIN_PIN) {
+        const { data: config, error: configError } = await supabaseClient
+            .from("admin_config")
+            .select("*")
+            .eq("id", 1)
+            .maybeSingle();
+        if (configError || !config) {
+            alert("Erro ao verificar configuração de administrador.");
+            return;
+        }
+        if (config.is_blocked) {
+            alert("⛔ Acesso de administrador temporariamente bloqueado.");
+            return;
+        }
+        const allowed = config.allowed_devices || [];
+        if (!allowed.includes(currentDeviceId)) {
+            const { data: existingReq } = await supabaseClient
+                .from("device_requests")
+                .select("*")
+                .eq("device_id", currentDeviceId)
+                .eq("status", "pending")
+                .maybeSingle();
+            if (!existingReq) {
+                await supabaseClient.from("device_requests").insert({
+                    device_id: currentDeviceId,
+                    status: "pending"
+                });
+            }
+            alert("🛡️ Novo dispositivo detectado. Uma solicitação de acesso foi enviada ao administrador. Aguarde a aprovação.");
+            return;
+        }
+        isLoggedIn = true; loggedInPin = pin;
+        document.getElementById("pinModal").classList.remove("active");
+        document.getElementById("loggedInInfo").style.display = "block";
+        // Esconder botões de planos para não logados
+        document.getElementById("btnVideosPlans").style.display = "none";
+        document.getElementById("btnMusicPlans").style.display = "none";
+        // Mostrar botões internos
+        document.getElementById("btnVideos").style.display = "inline-block";
+        document.getElementById("btnMusicas").style.display = "inline-block";
+        document.getElementById("btnAdminPlaylists").style.display = "inline-block";
+        document.getElementById("chatPanel").classList.add("hidden");
+        document.getElementById("feedbacksSection").style.display = "none";
+        // Atualizar modo
+        currentMode = "existing";
+        document.querySelectorAll('.btn-access').forEach(b => b.classList.remove('active'));
+        document.getElementById("btnExistingCustomer").classList.add('active');
+        // Renderizar
+        await renderLoggedInProducts();
+        renderAdminPlaylists();
+        renderMusicTab();
+        loadNews();
+        return;
     }
-    const allowed = config.allowed_devices || [];
-    if (!allowed.includes(currentDeviceId)) {
-      const { data: existingReq } = await supabaseClient
-        .from("device_requests")
+
+    // --- CLIENTE NORMAL ---
+    const { data: purchases, error } = await supabaseClient
+        .from("purchases")
         .select("*")
-        .eq("device_id", currentDeviceId)
-        .eq("status", "pending")
-        .maybeSingle();
-      if (!existingReq) {
-        await supabaseClient.from("device_requests").insert({
-          device_id: currentDeviceId,
-          status: "pending"
-        });
-      }
-      alert("🛡️ Novo dispositivo detectado. Uma solicitação de acesso foi enviada ao administrador. Aguarde a aprovação.");
-      return;
+        .eq("pin", pin)
+        .eq("status", "approved");
+
+    if (error) {
+        console.error("Erro ao buscar compras:", error);
+        alert("Erro ao verificar PIN. Tente novamente.");
+        return;
     }
-    isLoggedIn = true; loggedInPin = pin;
+
+    if (!purchases || purchases.length === 0) {
+        alert("PIN incorreto ou não aprovado!");
+        return;
+    }
+
+    let activePurchase = null;
+    const now = new Date();
+    for (const p of purchases) {
+        if (p.plan_name === "Vitalício" || !p.expiry_date) {
+            activePurchase = p;
+            break;
+        }
+        const expiry = new Date(p.expiry_date);
+        if (expiry > now) {
+            activePurchase = p;
+            break;
+        }
+    }
+
+    if (!activePurchase) {
+        alert("Seu PIN expirou. Entre em contato para renovar.");
+        return;
+    }
+
+    // --- LOGIN BEM-SUCEDIDO ---
+    isLoggedIn = true;
+    loggedInPin = pin;
     document.getElementById("pinModal").classList.remove("active");
     document.getElementById("loggedInInfo").style.display = "block";
+    // Esconder botões de planos para não logados
+    document.getElementById("btnVideosPlans").style.display = "none";
+    document.getElementById("btnMusicPlans").style.display = "none";
+    // Mostrar botões internos
     document.getElementById("btnVideos").style.display = "inline-block";
     document.getElementById("btnMusicas").style.display = "inline-block";
-    document.getElementById("btnAdminPlaylists").style.display = "inline-block";
+    document.getElementById("btnAdminPlaylists").style.display = "none";
     document.getElementById("chatPanel").classList.add("hidden");
     document.getElementById("feedbacksSection").style.display = "none";
-    renderProducts();
-    renderAdminPlaylists();
+
+    // Verificar se o cliente é vitalício (para +18) ou tem plano +18
+    const isVitalicio = purchases.some(p => p.plan_name === "Vitalício" && p.service_type === 'conta');
+    const hasVideosPlan = purchases.some(p => p.service_type === 'videos' && p.status === 'approved' && (p.plan_name === "Vitalício" || (p.expiry_date && new Date(p.expiry_date) > now)));
+
+    if (!isVitalicio && !hasVideosPlan) {
+        document.getElementById("btnVideos").style.display = "inline-block";
+        document.getElementById("btnVideos").onclick = function() {
+            alert("Para acessar o conteúdo +18, você precisa assinar um plano específico.");
+            switchMode("videosPlans");
+        };
+    } else {
+        document.getElementById("btnVideos").style.display = "inline-block";
+        document.getElementById("btnVideos").onclick = function() { switchMode("videos"); };
+    }
+
+    // Verificar se tem plano de música ativo
+    const hasMusicPlan = purchases.some(p => p.service_type === 'musica' && p.status === 'approved' && (p.plan_name === "Vitalício" || (p.expiry_date && new Date(p.expiry_date) > now)));
+    if (!hasMusicPlan) {
+        document.getElementById("btnMusicas").onclick = function() {
+            alert("Para acessar as músicas premium, assine um plano.");
+            switchMode("musicPlans");
+        };
+    } else {
+        document.getElementById("btnMusicas").onclick = function() { switchMode("musicas"); };
+    }
+
+    // Atualizar modo
+    currentMode = "existing";
+    document.querySelectorAll('.btn-access').forEach(b => b.classList.remove('active'));
+    document.getElementById("btnExistingCustomer").classList.add('active');
+
+    await renderLoggedInProducts();
     renderMusicTab();
-    return;
-  }
-
-  const { data: purchases, error } = await supabaseClient
-    .from("purchases")
-    .select("*")
-    .eq("pin", pin)
-    .eq("status", "approved");
-
-  if (error) {
-    console.error("Erro ao buscar compras:", error);
-    alert("Erro ao verificar PIN. Tente novamente.");
-    return;
-  }
-
-  if (!purchases || purchases.length === 0) {
-    alert("PIN incorreto ou não aprovado!");
-    return;
-  }
-
-  let activePurchase = null;
-  const now = new Date();
-  for (const p of purchases) {
-    if (p.plan_name === "Vitalício" || !p.expiry_date) {
-      activePurchase = p;
-      break;
-    }
-    const expiry = new Date(p.expiry_date);
-    if (expiry > now) {
-      activePurchase = p;
-      break;
-    }
-  }
-
-  if (!activePurchase) {
-    alert("Seu PIN expirou. Entre em contato para renovar.");
-    return;
-  }
-
-  isLoggedIn = true;
-  loggedInPin = pin;
-  document.getElementById("pinModal").classList.remove("active");
-  document.getElementById("loggedInInfo").style.display = "block";
-  document.getElementById("btnVideos").style.display = "inline-block";
-  document.getElementById("btnMusicas").style.display = "inline-block";
-  document.getElementById("btnAdminPlaylists").style.display = "none";
-  document.getElementById("chatPanel").classList.add("hidden");
-  document.getElementById("feedbacksSection").style.display = "none";
-
-  renderProducts(activePurchase);
-  renderMusicTab();
+    loadNews();
 }
 
 function closePinModal() { document.getElementById("pinModal").classList.remove("active"); switchMode("new"); }
+
 function logout() {
     isLoggedIn = false; loggedInPin = null;
     currentMode = "new";
     document.getElementById("loggedInInfo").style.display = "none";
+    // Mostrar botões de planos para não logados
+    document.getElementById("btnVideosPlans").style.display = "inline-block";
+    document.getElementById("btnMusicPlans").style.display = "inline-block";
+    // Esconder botões internos
     document.getElementById("btnVideos").style.display = "none";
     document.getElementById("btnMusicas").style.display = "none";
     document.getElementById("btnAdminPlaylists").style.display = "none";
-    document.getElementById("btnNewCustomer").classList.add("active");
-    document.getElementById("btnExistingCustomer").classList.remove("active");
-    document.getElementById("btnVideos").classList.remove("active");
-    document.getElementById("btnMusicas").classList.remove("active");
-    document.getElementById("btnAdminPlaylists").classList.remove("active");
+    // Resetar active dos botões
+    document.querySelectorAll('.btn-access').forEach(b => b.classList.remove('active'));
+    document.getElementById("btnNewCustomer").classList.add('active');
     document.getElementById("chatPanel").classList.remove("hidden");
     document.getElementById("feedbacksSection").style.display = "block";
+    // Restaurar onclick padrão dos botões internos (caso tenham sido alterados)
+    document.getElementById("btnVideos").onclick = function() { switchMode("videos"); };
+    document.getElementById("btnMusicas").onclick = function() { switchMode("musicas"); };
     renderProducts();
+    loadNews();
 }
-function switchMode(mode) {
-    if (mode === "videos") {
-        const pass = prompt("🔐 Senha de segurança para +18:");
-        if (pass !== "#+18xxx") { alert("Senha incorreta!"); return; }
-    }
-    currentMode = mode;
-    document.getElementById("btnNewCustomer").classList.toggle("active", mode==="new");
-    document.getElementById("btnExistingCustomer").classList.toggle("active", mode==="existing");
-    document.getElementById("btnVideos").classList.toggle("active", mode==="videos");
-    document.getElementById("btnMusicas").classList.toggle("active", mode==="musicas");
-    document.getElementById("btnAdminPlaylists").classList.toggle("active", mode==="adminPlaylists");
 
+// ===================== SWITCH MODE =====================
+function switchMode(mode) {
+    // Se não logado e tentar acessar áreas internas, redireciona para planos
+    if ((mode === "videos" || mode === "musicas" || mode === "existing") && !isLoggedIn) {
+        document.getElementById("pinModal").classList.add("active");
+        return;
+    }
+
+    currentMode = mode;
+    // Atualizar classes active dos botões
+    const btns = {
+        new: document.getElementById("btnNewCustomer"),
+        existing: document.getElementById("btnExistingCustomer"),
+        videos: document.getElementById("btnVideos"),
+        musicas: document.getElementById("btnMusicas"),
+        adminPlaylists: document.getElementById("btnAdminPlaylists"),
+        videosPlans: document.getElementById("btnVideosPlans"),
+        musicPlans: document.getElementById("btnMusicPlans")
+    };
+    // Remover active de todos
+    Object.values(btns).forEach(el => { if (el) el.classList.remove('active'); });
+    // Adicionar active ao botão correspondente
+    if (btns[mode]) btns[mode].classList.add('active');
+
+    // Mostrar/Esconder containers
     document.getElementById("productsGridContainer").style.display = "none";
     document.getElementById("musicas").style.display = "none";
     document.getElementById("adminPlaylists").style.display = "none";
@@ -1504,6 +2393,9 @@ function switchMode(mode) {
             alert("Apenas administrador pode acessar esta área.");
             switchMode("new");
         }
+    } else if (mode === "videos") {
+        document.getElementById("productsGridContainer").style.display = "block";
+        renderVideosContent();
     } else {
         document.getElementById("productsGridContainer").style.display = "block";
         if (mode === "existing" && !isLoggedIn) { document.getElementById("pinModal").classList.add("active"); return; }
@@ -1511,13 +2403,22 @@ function switchMode(mode) {
     }
 }
 
-// ---------- INICIALIZAÇÃO ----------
+// ===================== INICIALIZAÇÃO =====================
 async function init() {
     startTestimonials();
     startNotificationSpam();
     document.getElementById("musicas").style.display = "none";
     document.getElementById("adminPlaylists").style.display = "none";
+    // Esconder botões internos inicialmente
+    document.getElementById("btnVideos").style.display = "none";
+    document.getElementById("btnMusicas").style.display = "none";
+    document.getElementById("btnAdminPlaylists").style.display = "none";
+    // Mostrar botões de planos para não logados
+    document.getElementById("btnVideosPlans").style.display = "inline-block";
+    document.getElementById("btnMusicPlans").style.display = "inline-block";
     renderProducts();
+    // Carregar novidades
+    loadNews();
 }
 window.addEventListener("load", init);
 </script>
