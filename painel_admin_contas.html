@@ -147,12 +147,24 @@
             border-radius: 8px;
             border: 1px solid #4caf50;
         }
+        .purchase-card.music {
+            border-color: #ffa500;
+            background: #2a1f0a;
+        }
         .video-admin-card {
             background: #1a1a1a;
             padding: 12px;
             border-radius: 8px;
             border: 1px solid #d4af37;
             margin-bottom: 8px;
+        }
+        .badge-music {
+            background: #ffa500;
+            color: #000;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 0.7em;
+            font-weight: bold;
         }
         @media (max-width: 600px) {
             .status-bar { grid-template-columns: 1fr; }
@@ -171,7 +183,7 @@
     <button class="tab-btn active" onclick="switchTab('contas')">Contas</button>
     <button class="tab-btn" onclick="switchTab('compras')">Compras</button>
     <button class="tab-btn" onclick="switchTab('videos')">Vídeos +18</button>
-	<button class="tab-btn" onclick="switchTab('seguranca')">Segurança</button>
+    <button class="tab-btn" onclick="switchTab('seguranca')">Segurança</button>
 </div>
 
 <div id="contas" class="tab-content active">
@@ -243,7 +255,7 @@ function switchTab(tab) {
   if (tab === 'seguranca') loadSecurityTab();
 }
 
-// ========== COMPRAS ==========
+// ========== COMPRAS (com suporte a música e vinculação ao mesmo PIN) ==========
 async function renderPurchases() {
     const container = document.getElementById("purchasesList");
     const { data: purchases, error } = await supabaseClient
@@ -257,21 +269,28 @@ async function renderPurchases() {
     if (!purchases.length) { container.innerHTML = '<p>Nenhuma compra.</p>'; return; }
     container.innerHTML = purchases.map(p => {
         const expiracao = p.expiry_date ? new Date(p.expiry_date).toLocaleString("pt-BR") : "—";
+        const isMusic = p.service_type === 'musica';
+        const cardClass = isMusic ? 'purchase-card music' : 'purchase-card';
+        const badge = isMusic ? `<span class="badge-music">🎵 Música</span>` : '';
         const botoes = [];
         if (p.status === "pending") {
             botoes.push(`<button class="btn" onclick="approvePurchase('${p.id}')">Aprovar</button>`);
             botoes.push(`<button class="btn btn-delete" onclick="rejectPurchase('${p.id}')">Rejeitar</button>`);
         } else if (p.status === "approved") {
             botoes.push(`<button class="btn btn-renew" onclick="renewPurchase('${p.id}')">Renovar</button>`);
-            botoes.push(`<button class="btn btn-expire" onclick="simulateExpiry('${p.id}')">Simular Vencimento</button>`);
+            if (!isMusic) {
+                botoes.push(`<button class="btn btn-expire" onclick="simulateExpiry('${p.id}')">Simular Vencimento</button>`);
+            }
             botoes.push(`<button class="btn btn-delete" onclick="deletePurchase('${p.id}')">Excluir</button>`);
         }
-        return `<div class="purchase-card">
+        return `<div class="${cardClass}">
+            ${badge}
             <div><strong>${p.plan_name}</strong> - ${p.plan_price || ""}</div>
             <div>Cliente: ${p.payer_name || "—"}</div>
             <div>Email: ${p.client_email || "—"} | WhatsApp: ${p.client_whatsapp || "—"}</div>
             <div>Status: <span style="color:${p.status==='approved'?'#4caf50':p.status==='pending'?'#ffb300':'#ff4444'}">${p.status.toUpperCase()}</span></div>
             <div>PIN: ${p.pin || "—"} | Expira: ${expiracao}</div>
+            ${isMusic && p.pin ? `<div style="color:#ffa500;">🔗 Vinculado ao PIN: ${p.pin}</div>` : ''}
             <div class="btn-group" style="margin-top:8px;">${botoes.join("")}</div>
         </div>`;
     }).join("");
@@ -280,15 +299,89 @@ async function renderPurchases() {
 async function approvePurchase(id) {
     const { data: purchase } = await supabaseClient.from("purchases").select("*").eq("id", id).single();
     if (!purchase) return;
-    const pin = String(Math.floor(Math.random() * 1000000)).padStart(6, "0");
-    const isVitalicio = purchase.plan_name === "Vitalício";
-    const days = { "1 Mês":30, "3 Meses":90, "6 Meses":180, "1 Ano":365 }[purchase.plan_name];
-    const expiry = isVitalicio ? null : new Date(Date.now() + days * 86400000).toISOString();
+
+    const planName = purchase.plan_name;
+    const isMusic = purchase.service_type === 'musica';
+
+    // Determina dias
+    let days = 0;
+    if (planName === "Vitalício") {
+        days = -1;
+    } else {
+        const match = planName.match(/(\d+)\s*Mês/);
+        if (match) {
+            days = parseInt(match[1]) * 30;
+        } else {
+            const map = {
+                "mensal": 30, "trimestral": 90, "semestral": 180, "anual": 365,
+                "1 mês": 30, "3 meses": 90, "6 meses": 180, "1 ano": 365
+            };
+            const lower = planName.toLowerCase();
+            for (const [key, value] of Object.entries(map)) {
+                if (lower.includes(key)) { days = value; break; }
+            }
+        }
+    }
+
+    if (days === 0) {
+        const input = prompt(`Plano "${planName}" não reconhecido. Informe a duração em dias (ex: 30):`);
+        if (input === null) return;
+        days = parseInt(input);
+        if (isNaN(days) || days <= 0) {
+            alert("Duração inválida.");
+            return;
+        }
+    }
+
+    // Lógica do PIN
+    let pin = null;
+    if (isMusic) {
+        // Para música: pergunta se quer vincular a um PIN existente
+        const existingPin = prompt("Digite o PIN do cliente (deixe em branco para gerar um novo):");
+        if (existingPin !== null && existingPin.trim() !== '') {
+            pin = existingPin.trim();
+            // Verifica se o PIN existe em alguma compra aprovada
+            const { data: existing } = await supabaseClient
+                .from("purchases")
+                .select("pin")
+                .eq("pin", pin)
+                .eq("status", "approved")
+                .maybeSingle();
+            if (!existing) {
+                const confirmar = confirm(`PIN ${pin} não encontrado em compras aprovadas. Deseja continuar assim mesmo?`);
+                if (!confirmar) return;
+            }
+        } else {
+            // Gera novo PIN
+            pin = String(Math.floor(Math.random() * 1000000)).padStart(6, "0");
+        }
+    } else {
+        // Para conta: sempre gera novo PIN
+        pin = String(Math.floor(Math.random() * 1000000)).padStart(6, "0");
+    }
+
+    let expiry = null;
+    const purchaseDate = new Date().toISOString();
+    if (days > 0) {
+        const expiryDate = new Date(Date.now() + days * 86400000);
+        expiry = expiryDate.toISOString();
+    }
+
     const { error } = await supabaseClient.from("purchases").update({
-        pin, status: "approved", purchase_date: new Date().toISOString(), expiry_date: expiry
+        pin,
+        status: "approved",
+        purchase_date: purchaseDate,
+        expiry_date: expiry
     }).eq("id", id);
-    if (!error) { renderPurchases(); alert(`Aprovado! PIN: ${pin}`); }
+
+    if (!error) {
+        renderPurchases();
+        alert(`✅ Aprovado! PIN: ${pin}`);
+    } else {
+        alert("Erro ao aprovar: " + error.message);
+    }
 }
+
 async function rejectPurchase(id) {
     await supabaseClient.from("purchases").update({ status: "rejected" }).eq("id", id);
     renderPurchases();
@@ -305,7 +398,7 @@ async function renewPurchase(id) {
         alert("Plano vitalício não precisa de renovação.");
         return;
     }
-    const days = { "1 Mês":30, "3 Meses":90, "6 Meses":180, "1 Ano":365 }[purchase.plan_name] || 30;
+    const days = { "1 Mês":30, "3 Meses":90, "6 Meses":180, "1 Ano":365, "Mensal":30, "Trimestral":90, "Semestral":180, "Anual":365 }[purchase.plan_name] || 30;
     const newExpiry = new Date(Date.now() + days * 86400000).toISOString();
     const { error } = await supabaseClient.from("purchases").update({ expiry_date: newExpiry }).eq("id", id);
     if (!error) { renderPurchases(); alert("Vencimento renovado com sucesso!"); }
@@ -318,11 +411,11 @@ async function simulateExpiry(id) {
         return;
     }
     if (!confirm("Simular vencimento? O cliente será deslogado se estiver online.")) return;
-    const pastDate = new Date(Date.now() - 60000).toISOString(); // 1 minuto atrás
+    const pastDate = new Date(Date.now() - 60000).toISOString();
     const { error } = await supabaseClient.from("purchases").update({ expiry_date: pastDate }).eq("id", id);
     if (!error) {
         renderPurchases();
-        alert("Vencimento simulado! O cliente não conseguirá mais acessar com este PIN.");
+        alert("Vencimento simulado!");
     }
 }
 async function clearAllPurchases() {
@@ -503,7 +596,6 @@ async function loadSecurityTab() {
   document.getElementById("btnToggleBlock").textContent = isBlocked ? "🔓 Desbloquear Admin" : "🔒 Bloquear Admin";
   document.getElementById("btnToggleBlock").style.background = isBlocked ? "#ffb300" : "#d4af37";
 
-  // Lista de autorizados
   const allowedHtml = allowed.length
     ? allowed.map(d => `<div class="purchase-card" style="margin-bottom:8px;">
         <span>🟢 ${d}</span>
@@ -512,7 +604,6 @@ async function loadSecurityTab() {
     : "<p>Nenhum dispositivo autorizado ainda.</p>";
   document.getElementById("allowedDevicesList").innerHTML = allowedHtml;
 
-  // Solicitações pendentes
   const { data: requests } = await supabaseClient
     .from("device_requests")
     .select("*")
@@ -541,7 +632,6 @@ async function toggleBlockAdmin() {
 }
 
 async function approveDevice(requestId, deviceId) {
-  // Adiciona device à lista de autorizados
   const { data: config } = await supabaseClient.from("admin_config").select("*").eq("id", 1).maybeSingle();
   if (!config) return;
   const allowed = config.allowed_devices || [];
@@ -549,7 +639,6 @@ async function approveDevice(requestId, deviceId) {
     allowed.push(deviceId);
     await supabaseClient.from("admin_config").update({ allowed_devices: allowed }).eq("id", 1);
   }
-  // Atualiza status da solicitação
   await supabaseClient.from("device_requests").update({ status: "approved" }).eq("id", requestId);
   loadSecurityTab();
 }
