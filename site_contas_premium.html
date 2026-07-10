@@ -592,6 +592,9 @@ async function searchYoutube() {
         return;
     }
 
+    // --- NOVO: Proxy CORS (corsproxy.io) ---
+    const proxyUrl = 'https://corsproxy.io/?url=';
+
     // Lista de instâncias Invidious (tenta a primeira que funcionar)
     const instances = [
         'https://invidious.snopyta.org',
@@ -600,15 +603,13 @@ async function searchYoutube() {
         'https://inv.riverside.rocks'
     ];
 
-    // Proxy CORS (allorigins.win) – converte a resposta para JSON
-    const proxyUrl = 'https://api.allorigins.win/raw?url=';
-
     let data = null;
     let lastError = null;
 
     for (const baseUrl of instances) {
         try {
             const apiUrl = `${baseUrl}/api/v1/search?q=${encodeURIComponent(query)}&type=video`;
+            // --- AQUI: usa o novo proxy ---
             const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             data = await response.json();
