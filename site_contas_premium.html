@@ -77,6 +77,24 @@
         .btn-buy { background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%); color: #0a0a0a; }
         .btn-show-accounts { background: linear-gradient(135deg, #00aaff 0%, #0077cc 100%); color: #0a0a0a; margin-top: 10px; }
 
+        /* Botão YouTube Premium */
+        .btn-youtube {
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            color: #fff;
+            font-weight: bold;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+        }
+        .btn-youtube:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(255,0,0,0.5);
+        }
+
         .feedbacks-section { margin-bottom: 20px; }
         .feedbacks-title { color: #00ff88; text-align: center; font-size: 1.8em; margin-bottom: 15px; font-weight: bold; }
         .testimonial-carousel {
@@ -161,6 +179,15 @@
         .close-modal-btn {
             position: absolute; top: 10px; right: 15px; background: none; border: none;
             color: #ff4444; font-size: 1.5em; cursor: pointer;
+        }
+
+        /* Modal YouTube */
+        .modal-youtube .modal-content {
+            max-width: 800px;
+            border-color: #ff0000;
+        }
+        .modal-youtube .modal-content h2 {
+            color: #ff0000;
         }
 
         .videos-grid {
@@ -291,7 +318,7 @@
     </div>
 </div>
 
-<!-- Modal de Contas (com blur e botão revelar todas) -->
+<!-- Modal de Contas -->
 <div class="modal" id="accountsModal" onclick="if(event.target === this) closeAccountsModal()">
     <div class="modal-content" style="max-width:600px; max-height:80vh; overflow-y:auto; position:relative;">
         <button class="close-modal-btn" onclick="closeAccountsModal()">✕</button>
@@ -301,7 +328,7 @@
     </div>
 </div>
 
-<!-- Modal de Vídeo -->
+<!-- Modal de Vídeo +18 -->
 <div class="modal" id="videoModal" onclick="handleVideoModalClick(event)">
     <div class="video-lightbox-inner">
         <button class="video-lightbox-close" onclick="closeVideoModal()">✕</button>
@@ -310,6 +337,23 @@
         <div class="video-lightbox-frame-wrap" style="position:relative;padding-bottom:56.25%;height:0;background:#000;border-radius:10px;overflow:hidden;">
             <iframe id="videoModalFrame" src="" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"></iframe>
         </div>
+    </div>
+</div>
+
+<!-- NOVO: Modal YouTube Premium (sem anúncios) -->
+<div class="modal modal-youtube" id="youtubeModal" onclick="if(event.target === this) closeYoutubeModal()">
+    <div class="modal-content">
+        <button class="close-modal-btn" onclick="closeYoutubeModal()">✕</button>
+        <h2 style="color:#ff0000; text-align:center; margin-bottom:15px;">🎬 YouTube sem Anúncios</h2>
+        <div style="display:flex; gap:8px; margin-bottom:15px;">
+            <input type="text" id="youtubeSearchInput" placeholder="Pesquisar vídeo ou colar URL" style="flex:1; padding:10px; background:#0a0a0a; border:1px solid #ff0000; color:#fff; border-radius:6px; font-size:1em;" onkeypress="if(event.key === 'Enter') searchYoutube()">
+            <button onclick="searchYoutube()" style="background:#ff0000; color:#fff; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-weight:bold;">Buscar</button>
+        </div>
+        <div id="youtubeResults" style="display:flex; flex-wrap:wrap; gap:10px; max-height:250px; overflow-y:auto; margin-bottom:15px; padding:5px; background:rgba(255,0,0,0.05); border-radius:6px;"></div>
+        <div id="youtubePlayerContainer" style="position:relative; padding-bottom:56.25%; height:0; background:#000; border-radius:8px; overflow:hidden;">
+            <iframe id="youtubePlayer" style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;" allowfullscreen></iframe>
+        </div>
+        <div style="margin-top:10px; color:#aaa; font-size:0.9em; text-align:center;">🔹 Vídeos carregados sem propagandas (via Invidious)</div>
     </div>
 </div>
 
@@ -468,7 +512,6 @@ async function openAccountsModal(serviceId) {
 
             const userDisplay = acc.username ? `<strong>${acc.username}</strong><br>` : "";
 
-            // Adiciona classe 'blurred' por padrão
             return `<div class="account-line blurred">
                 ${userDisplay}${pwDisplay}
                 ${buttonHtml}
@@ -482,7 +525,6 @@ async function openAccountsModal(serviceId) {
     document.getElementById("accountsModal").classList.add("active");
     document.body.style.overflow = "hidden";
 
-    // Resetar visibilidade do botão revelar
     const revealBtn = document.getElementById("revealAllBtn");
     if (revealBtn) {
         revealBtn.style.display = "block";
@@ -494,13 +536,11 @@ function revealAllAccounts() {
     const blurredLines = document.querySelectorAll("#accountsModalBody .account-line.blurred");
     blurredLines.forEach(line => {
         line.classList.remove("blurred");
-        line.style.filter = "none"; // Força a remoção
+        line.style.filter = "none";
     });
     const revealBtn = document.getElementById("revealAllBtn");
     if (revealBtn) {
         revealBtn.style.display = "none";
-        // Pequeno efeito visual ao sumir
-        revealBtn.style.transition = "0.3s";
         revealBtn.style.opacity = "0";
     }
 }
@@ -514,6 +554,98 @@ function closeAccountsModal() {
     document.body.style.overflow = "";
 }
 
+// ---------- YOUTUBE PREMIUM (SEM ANÚNCIOS) ----------
+function accessYoutubePremium() {
+    if (!isLoggedIn) {
+        // Se não estiver logado, abre o modal de PIN
+        document.getElementById("pinModal").classList.add("active");
+        return;
+    }
+    openYoutubeModal();
+}
+
+function openYoutubeModal() {
+    document.getElementById("youtubeModal").classList.add("active");
+    document.body.style.overflow = "hidden";
+    // Limpa resultados e player
+    document.getElementById("youtubeResults").innerHTML = "";
+    document.getElementById("youtubePlayer").src = "";
+}
+
+function closeYoutubeModal() {
+    document.getElementById("youtubeModal").classList.remove("active");
+    document.body.style.overflow = "";
+    // Pausa o vídeo removendo src
+    document.getElementById("youtubePlayer").src = "";
+}
+
+async function searchYoutube() {
+    const query = document.getElementById("youtubeSearchInput").value.trim();
+    if (!query) return;
+
+    // Verifica se é uma URL do YouTube
+    const urlMatch = query.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if (urlMatch) {
+        const videoId = urlMatch[1];
+        loadYoutubeVideo(videoId);
+        document.getElementById("youtubeResults").innerHTML = `<div style="color:#aaa;">▶ Vídeo carregado: ${videoId}</div>`;
+        return;
+    }
+
+    // Lista de instâncias Invidious (tenta a primeira que funcionar)
+    const instances = [
+        'https://invidious.snopyta.org',
+        'https://invidious.fdn.fr',
+        'https://invidious.kavin.rocks',
+        'https://inv.riverside.rocks'
+    ];
+
+    // Proxy CORS (allorigins.win) – converte a resposta para JSON
+    const proxyUrl = 'https://api.allorigins.win/raw?url=';
+
+    let data = null;
+    let lastError = null;
+
+    for (const baseUrl of instances) {
+        try {
+            const apiUrl = `${baseUrl}/api/v1/search?q=${encodeURIComponent(query)}&type=video`;
+            const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            data = await response.json();
+            break; // sucesso, sai do loop
+        } catch (e) {
+            lastError = e;
+            console.warn(`Falha com ${baseUrl}:`, e);
+            // continua para a próxima instância
+        }
+    }
+
+    const resultsContainer = document.getElementById("youtubeResults");
+    if (!data || data.length === 0) {
+        resultsContainer.innerHTML = `<p style="color:#f44;width:100%;text-align:center;">Erro ao buscar: ${lastError?.message || 'Nenhum resultado encontrado ou instâncias offline'}</p>`;
+        return;
+    }
+
+    resultsContainer.innerHTML = "";
+    data.slice(0, 10).forEach(item => {
+        const div = document.createElement("div");
+        div.style.cssText = "background:#1a1a1a;padding:8px;border-radius:6px;cursor:pointer;border:1px solid #ff0000;flex:1 0 180px;max-width:200px;";
+        div.innerHTML = `
+            <div style="font-weight:bold;color:#fff;font-size:0.9em;">${item.title}</div>
+            <div style="color:#aaa;font-size:0.8em;">${item.author}</div>
+        `;
+        div.addEventListener("click", () => loadYoutubeVideo(item.videoId));
+        resultsContainer.appendChild(div);
+    });
+}
+
+function loadYoutubeVideo(videoId) {
+    const embedUrl = `https://invidious.snopyta.org/embed/${videoId}?autoplay=1&rel=0`;
+    document.getElementById("youtubePlayer").src = embedUrl;
+    // Opcional: limpa resultados após carregar
+    document.getElementById("youtubeResults").innerHTML = `<div style="color:#4caf50;width:100%;text-align:center;">▶ Tocando vídeo (sem anúncios)</div>`;
+}
+
 // ---------- RENDERIZAÇÃO PRINCIPAL ----------
 async function renderProducts(purchaseFromPin = null) {
     const grid = document.getElementById("productsGrid");
@@ -521,10 +653,12 @@ async function renderProducts(purchaseFromPin = null) {
     grid.className = (currentMode === "videos") ? "videos-grid" : "products-grid";
 
     if (currentMode === "new") {
+        // Busca serviços para exibir como benefícios
         const { data: services } = await supabaseClient.from("services").select("name, emoji").order("created_at", { ascending: false });
         const serviceList = services || [];
         const benefitItems = serviceList.map(s => `<div class="benefit-item">${s.emoji||"📺"} ${s.name}</div>`).join("");
 
+        // Planos normais
         plans.forEach(plan => {
             const card = document.createElement("div");
             card.className = "product-card" + (plan.name === "6 Meses" ? " best-offer" : "");
@@ -541,6 +675,29 @@ async function renderProducts(purchaseFromPin = null) {
             `;
             grid.appendChild(card);
         });
+
+        // ========== NOVO CARD YOUTUBE PREMIUM ==========
+        const youtubeCard = document.createElement("div");
+        youtubeCard.className = "product-card";
+        youtubeCard.style.borderColor = "#ff0000";
+        youtubeCard.style.background = "linear-gradient(135deg, #1a0000 0%, #2d0000 100%)";
+        youtubeCard.innerHTML = `
+            <div class="product-header">
+                <div class="product-logo">▶️</div>
+                <h2 class="product-name" style="color:#ff0000;">YouTube Premium</h2>
+                <div class="product-price" style="color:#ff8800; font-size:1.4em;">Sem Anúncios</div>
+            </div>
+            <div class="benefits-list" style="border-color:#ff0000;">
+                <div class="benefit-item">🎥 Assista qualquer vídeo</div>
+                <div class="benefit-item">🚫 Sem propagandas</div>
+                <div class="benefit-item">🔓 Acesso ilimitado</div>
+                <div class="benefit-item">📱 Compatível com todos</div>
+            </div>
+            <button class="btn btn-youtube" onclick="accessYoutubePremium()">▶ Acessar Agora</button>
+        `;
+        grid.appendChild(youtubeCard);
+        // =============================================
+
         return;
     }
 
@@ -554,7 +711,6 @@ async function renderProducts(purchaseFromPin = null) {
         let userPurchase = null;
         if (loggedInPin !== ADMIN_PIN) {
             userPurchase = purchaseFromPin || (await supabaseClient.from("purchases").select("*").eq("pin", loggedInPin).eq("status", "approved").maybeSingle()).data;
-            // Verificar expiração (exceto Vitalício)
             if (userPurchase && userPurchase.plan_name !== "Vitalício" && userPurchase.expiry_date && new Date(userPurchase.expiry_date) < new Date()) {
                 alert("Sua conta expirou! Entre em contato para renovar.");
                 logout();
@@ -619,10 +775,10 @@ async function renderProducts(purchaseFromPin = null) {
                 if (vid) embedUrl = `https://www.youtube.com/embed/${vid}`;
             }
             card.innerHTML = `
-    <div class="video-thumb-poster">
-        <iframe src="${embedUrl}" loading="lazy" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
-        <div class="play-icon">▶</div>
-    </div>
+                <div class="video-thumb-poster">
+                    <iframe src="${embedUrl}" loading="lazy" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
+                    <div class="play-icon">▶</div>
+                </div>
                 <div class="video-thumb-info">
                     <div class="video-thumb-title">${v.title}</div>
                     <div class="video-thumb-category">📂 ${v.category || 'Sem categoria'}</div>
@@ -636,7 +792,7 @@ async function renderProducts(purchaseFromPin = null) {
     grid.className = "products-grid";
 }
 
-// ---------- VÍDEO MODAL ----------
+// ---------- VÍDEO MODAL (+18) ----------
 function openVideoModal(url, title, category) {
     document.getElementById("videoModalTitle").textContent = title || "";
     document.getElementById("videoModalCategory").textContent = category ? `📂 ${category}` : "";
@@ -657,7 +813,6 @@ function closeVideoModal() {
     document.getElementById("videoModalFrame").src = "";
     document.body.style.overflow = "";
 }
-
 function handleVideoModalClick(e) { if (e.target === document.getElementById("videoModal")) closeVideoModal(); }
 
 // ---------- AUTENTICAÇÃO ----------
@@ -665,9 +820,7 @@ async function validatePin() {
   const pin = document.getElementById("pinInput").value.trim();
   if (pin.length !== 6) { alert("PIN inválido!"); return; }
 
-  // ---- ACESSO ADMIN (com segurança) ----
   if (pin === ADMIN_PIN) {
-    // Verifica se o admin está bloqueado globalmente
     const { data: config, error: configError } = await supabaseClient
       .from("admin_config")
       .select("*")
@@ -681,30 +834,23 @@ async function validatePin() {
       alert("⛔ Acesso de administrador temporariamente bloqueado.");
       return;
     }
-
-    // Verifica se o dispositivo já está autorizado
     const allowed = config.allowed_devices || [];
     if (!allowed.includes(currentDeviceId)) {
-      // Dispositivo não autorizado → envia solicitação
       const { data: existingReq } = await supabaseClient
         .from("device_requests")
         .select("*")
         .eq("device_id", currentDeviceId)
         .eq("status", "pending")
         .maybeSingle();
-
       if (!existingReq) {
         await supabaseClient.from("device_requests").insert({
           device_id: currentDeviceId,
           status: "pending"
         });
       }
-
       alert("🛡️ Novo dispositivo detectado. Uma solicitação de acesso foi enviada ao administrador. Aguarde a aprovação.");
       return;
     }
-
-    // Dispositivo autorizado → acesso liberado
     isLoggedIn = true; loggedInPin = pin;
     document.getElementById("pinModal").classList.remove("active");
     document.getElementById("loggedInInfo").style.display = "block";
@@ -715,7 +861,6 @@ async function validatePin() {
     return;
   }
 
-  // ---- ACESSO DE CLIENTE (normal) ----
   const { data: purchase } = await supabaseClient
     .from("purchases")
     .select("*")
