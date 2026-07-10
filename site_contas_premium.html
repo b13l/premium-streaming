@@ -74,10 +74,33 @@
         }
         .benefit-item { color: #aaffcc; font-size: 0.9em; margin: 4px 0; padding-left: 18px; position: relative; }
         .benefit-item::before { content: "•"; position: absolute; left: 0; color: #00aaff; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-buy { background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%); color: #0a0a0a; }
-        .btn-show-accounts { background: linear-gradient(135deg, #00aaff 0%, #0077cc 100%); color: #0a0a0a; margin-top: 10px; }
-        .btn-music-assinar { background: linear-gradient(135deg, #ffa500 0%, #ff8800 100%); color: #0a0a0a; }
+        .btn { padding: 8px 16px; border: none; border-radius: 6px; font-size: 0.9em; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-buy { width: 100%; padding: 12px; background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%); color: #0a0a0a; }
+        .btn-show-accounts { background: linear-gradient(135deg, #00aaff 0%, #0077cc 100%); color: #0a0a0a; margin-top: 10px; width: 100%; padding: 12px; }
+        .btn-music-assinar {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            background: linear-gradient(135deg, #ffa500, #ff8800);
+            color: #0a0a0a;
+            transition: 0.3s;
+        }
+        .btn-music-assinar:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(255,165,0,0.4);
+        }
+        .btn-edit { background: #00aaff; color: #0a0a0a; }
+        .btn-edit:hover { background: #0088cc; }
+        .btn-delete { background: #ff6b6b; color: #fff; }
+        .btn-delete:hover { background: #e05555; }
+        .btn-save { background: #4caf50; color: #fff; }
+        .btn-save:hover { background: #3d8b40; }
+        .btn-cancel { background: #888; color: #fff; }
+        .btn-cancel:hover { background: #666; }
 
         .feedbacks-section { margin-bottom: 20px; }
         .feedbacks-title { color: #00ff88; text-align: center; font-size: 1.8em; margin-bottom: 15px; font-weight: bold; }
@@ -164,6 +187,23 @@
             position: absolute; top: 10px; right: 15px; background: none; border: none;
             color: #ff4444; font-size: 1.5em; cursor: pointer;
         }
+        .modal-content input, .modal-content textarea {
+            width: 100%;
+            padding: 10px;
+            background: #0a0a0a;
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .modal-content label {
+            display: block;
+            color: #00ffff;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+        .modal-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .modal-actions .btn { flex: 1; text-align: center; }
 
         /* ===== SEÇÃO MÚSICA ===== */
         .music-section {
@@ -181,9 +221,16 @@
         }
         .music-section .subtitle {
             text-align: center;
-            color: #aaa;
+            color: #ddd;
             margin-bottom: 20px;
-            font-size: 0.95em;
+            font-size: 1em;
+            background: rgba(255,165,0,0.1);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,165,0,0.2);
+        }
+        .music-section .subtitle strong {
+            color: #ffa500;
         }
 
         .music-plans-grid {
@@ -312,6 +359,41 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+        }
+
+        .admin-playlist-item {
+            background: #1a1a1a;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #00ffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .admin-playlist-item .info {
+            flex: 1;
+            min-width: 200px;
+        }
+        .admin-playlist-item .info strong {
+            color: #00ffff;
+        }
+        .admin-playlist-item .info p {
+            color: #aaa;
+            font-size: 0.9em;
+            margin: 4px 0;
+        }
+        .admin-playlist-item .info .url {
+            color: #888;
+            font-size: 0.8em;
+            word-break: break-all;
+        }
+        .admin-playlist-item .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .videos-grid {
@@ -471,11 +553,30 @@
     </div>
 </div>
 
-<!-- ========== ABA DE MÚSICAS PREMIUM (com planos pagos) ========== -->
+<!-- ===== MODAL DE EDIÇÃO DE PLAYLIST ===== -->
+<div class="modal" id="editPlaylistModal" onclick="if(event.target === this) closeEditModal()">
+    <div class="modal-content">
+        <button class="close-modal-btn" onclick="closeEditModal()">✕</button>
+        <h2 style="color:#00ffff; text-align:center; margin-bottom:15px;">✏️ Editar Playlist</h2>
+        <input type="hidden" id="editPlaylistId">
+        <label>Título</label>
+        <input type="text" id="editPlaylistTitle" placeholder="Título da playlist">
+        <label>Descrição (liste as músicas)</label>
+        <textarea id="editPlaylistDesc" rows="3" placeholder="Descrição - liste as músicas separadas por vírgula"></textarea>
+        <label>URL do Embed</label>
+        <input type="text" id="editPlaylistUrl" placeholder="https://w.soundcloud.com/player/?url=...">
+        <div class="modal-actions">
+            <button class="btn btn-cancel" onclick="closeEditModal()">Cancelar</button>
+            <button class="btn btn-save" onclick="saveEditPlaylist()">💾 Salvar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== ABA DE MÚSICAS PREMIUM ========== -->
 <div id="musicas" class="tab-content" style="display:none;">
     <div class="music-section">
         <h2>🎵 Músicas Premium</h2>
-        <p class="subtitle" id="musicSubtitle">Ouça suas playlists favoritas sem anúncios</p>
+        <p class="subtitle" id="musicSubtitle">Assine um plano para ouvir música sem anúncios</p>
 
         <!-- Container de planos de música (exibido se não tiver assinatura ativa) -->
         <div id="musicPlansContainer">
@@ -528,7 +629,7 @@ if (!currentDeviceId) {
 
 const nomes = ["Rafael","Lucas","Bruno","Pedro","Felipe","João","Marcus","Diego","André","Carlos","Gabriel","Gustavo","Rodrigo","Eduardo","Mateus","Thiago","Leonardo","Vinícius","Henrique","Daniel","Alexandre","Leandro","Fábio","Ricardo","Fernando","Marcelo","Paulo","Renato","Sérgio","Tiago","Caio","Murilo","Igor","Davi","Samuel","Otávio","Guilherme","Renan","Adriano","Cláudio","Roberto","Wellington","Anderson","Douglas","Márcio","Patrick","Julio","Evandro","Flávio","Alan","Vagner","Nilson","Emerson","Luciano","Elias","Cristiano","Walisson","Jonatan","Fabian","Alexsandro","Ana","Julia","Fernanda","Camila","Beatriz","Larissa","Mariana","Amanda","Priscila","Letícia","Isabela","Natália","Aline","Bruna","Tatiane","Vanessa","Renata","Patrícia","Débora","Giovana","Sabrina","Monique","Jéssica","Cláudia","Simone","Adriana","Michele","Viviane","Bianca","Raquel","Eliane","Sueli","Karine","Thaís","Nathalia","Flávia","Luciana","Luana","Dandara","Yasmin","Kevin","Ryan","Bryan","Willian","Erick","Cleiton","Jadson","Danilo","Rogério","Alisson","Wesley","Marcos","Edson","Valdecir","Welton","Gleisson","Jhonatan","Maikel","Claysson","Rômulo"];
 
-// Planos de contas (já existentes)
+// Planos de contas
 const plans = [
     { id: 1, name: "1 Mês",     logo: "📺", price: "R$ 50,00",  duration: 1  },
     { id: 2, name: "3 Meses",   logo: "🎬", price: "R$ 75,00",  duration: 3  },
@@ -537,7 +638,7 @@ const plans = [
     { id: 5, name: "Vitalício", logo: "👑", price: "R$ 500,00", duration: -1 }
 ];
 
-// Planos de música (novos)
+// Planos de música
 const musicPlans = [
     { id: 'm1', name: "Mensal",     price: "R$ 25,00",  days: 30,  logo: "🎵" },
     { id: 'm2', name: "Trimestral", price: "R$ 35,00",  days: 90,  logo: "🎶" },
@@ -557,7 +658,7 @@ let currentMode = "new";
 let isLoggedIn = false;
 let loggedInPin = null;
 let selectedPlan = null;
-let selectedServiceType = 'conta'; // 'conta' ou 'musica'
+let selectedServiceType = 'conta';
 let proofFileData = null;
 let testimonialInterval, notificationInterval;
 
@@ -716,7 +817,7 @@ function closeAccountsModal() {
     document.body.style.overflow = "";
 }
 
-// ---------- PLAYLISTS (EMBED DIRETO NOS CARDS) ----------
+// ---------- PLAYLISTS (COM EDIÇÃO) ----------
 function extractEmbedUrl(input) {
     if (!input) return '';
     if (input.startsWith('http') && input.includes('soundcloud.com/player')) {
@@ -787,16 +888,25 @@ async function renderPlaylists() {
 }
 
 function filterPlaylists() {
-    const search = document.getElementById('playlistSearch').value.toLowerCase();
+    const search = document.getElementById('playlistSearch').value.toLowerCase().trim();
     const cards = document.querySelectorAll('.playlist-card');
     let hasVisible = false;
+
     cards.forEach(card => {
         const title = card.querySelector('h3')?.textContent?.toLowerCase() || '';
         const desc = card.querySelector('.card-desc')?.textContent?.toLowerCase() || '';
-        const match = title.includes(search) || desc.includes(search);
+
+        // Divide a descrição em palavras-chave (separadas por vírgula ou quebra de linha)
+        const keywords = desc.split(/[,;\n]/).map(k => k.trim().toLowerCase()).filter(k => k.length > 0);
+        const fullText = title + ' ' + desc;
+
+        // Verifica se a busca está no título, na descrição ou em alguma palavra-chave
+        const match = fullText.includes(search) || keywords.some(k => k.includes(search) || search.includes(k));
+
         card.style.display = match ? 'block' : 'none';
         if (match) hasVisible = true;
     });
+
     const grid = document.getElementById('playlistsGrid');
     const noResult = grid.querySelector('.no-result');
     if (!hasVisible) {
@@ -804,7 +914,7 @@ function filterPlaylists() {
             const msg = document.createElement('div');
             msg.className = 'no-result';
             msg.style.cssText = 'grid-column:1/-1; text-align:center; padding:20px; color:#aaa;';
-            msg.innerHTML = '<span style="font-size:2em;">🔍</span><p>Nenhuma playlist encontrada para esta busca.</p>';
+            msg.innerHTML = '<span style="font-size:2em;">🔍</span><p>Nenhuma música encontrada para: <strong>"' + search + '"</strong></p>';
             grid.appendChild(msg);
         }
     } else {
@@ -812,7 +922,7 @@ function filterPlaylists() {
     }
 }
 
-// ---------- ADMIN PLAYLISTS ----------
+// ---------- ADMIN PLAYLISTS (COM EDIÇÃO) ----------
 async function addPlaylist() {
     const title = document.getElementById('playlistTitleInput').value.trim();
     const description = document.getElementById('playlistDescInput').value.trim();
@@ -856,6 +966,69 @@ async function deletePlaylist(id) {
     await renderPlaylists();
 }
 
+// --- Funções de edição ---
+function openEditModal(id) {
+    const playlist = document.querySelector(`.admin-playlist-item[data-id="${id}"]`);
+    if (!playlist) {
+        // Se não encontrar no DOM, recarregar a lista e tentar novamente
+        renderAdminPlaylists().then(() => {
+            const p = document.querySelector(`.admin-playlist-item[data-id="${id}"]`);
+            if (p) {
+                const title = p.querySelector('.info .title')?.textContent || '';
+                const desc = p.querySelector('.info .desc')?.textContent || '';
+                const url = p.querySelector('.info .url')?.textContent || '';
+                document.getElementById('editPlaylistId').value = id;
+                document.getElementById('editPlaylistTitle').value = title;
+                document.getElementById('editPlaylistDesc').value = desc;
+                document.getElementById('editPlaylistUrl').value = url;
+                document.getElementById('editPlaylistModal').classList.add('active');
+            }
+        });
+        return;
+    }
+    const title = playlist.querySelector('.info .title')?.textContent || '';
+    const desc = playlist.querySelector('.info .desc')?.textContent || '';
+    const url = playlist.querySelector('.info .url')?.textContent || '';
+    document.getElementById('editPlaylistId').value = id;
+    document.getElementById('editPlaylistTitle').value = title;
+    document.getElementById('editPlaylistDesc').value = desc;
+    document.getElementById('editPlaylistUrl').value = url;
+    document.getElementById('editPlaylistModal').classList.add('active');
+}
+
+function closeEditModal() {
+    document.getElementById('editPlaylistModal').classList.remove('active');
+}
+
+async function saveEditPlaylist() {
+    const id = document.getElementById('editPlaylistId').value;
+    const title = document.getElementById('editPlaylistTitle').value.trim();
+    const description = document.getElementById('editPlaylistDesc').value.trim();
+    let embedUrl = document.getElementById('editPlaylistUrl').value.trim();
+
+    if (!title || !embedUrl) {
+        alert('Preencha título e URL do embed.');
+        return;
+    }
+
+    embedUrl = extractEmbedUrl(embedUrl);
+
+    const { error } = await supabaseClient
+        .from('playlists')
+        .update({ title, description, embed_url: embedUrl })
+        .eq('id', id);
+
+    if (error) {
+        alert('Erro ao atualizar: ' + error.message);
+        return;
+    }
+
+    closeEditModal();
+    await renderAdminPlaylists();
+    await renderPlaylists();
+}
+
+// --- Renderização da lista admin com botão Editar ---
 async function renderAdminPlaylists() {
     const playlists = await loadPlaylists();
     const container = document.getElementById('adminPlaylistsList');
@@ -864,13 +1037,16 @@ async function renderAdminPlaylists() {
         return;
     }
     container.innerHTML = playlists.map(p => `
-        <div style="background:#1a1a1a; padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid #00ffff; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <strong style="color:#00ffff;">${p.title}</strong>
-                <p style="color:#aaa; font-size:0.9em;">${p.description || ''}</p>
-                <span style="color:#888; font-size:0.8em; word-break:break-all;">${p.embed_url}</span>
+        <div class="admin-playlist-item" data-id="${p.id}">
+            <div class="info">
+                <strong class="title">${p.title}</strong>
+                <p class="desc">${p.description || ''}</p>
+                <span class="url">${p.embed_url}</span>
             </div>
-            <button onclick="deletePlaylist(${p.id})" style="background:#ff4444; color:#fff; border:none; padding:6px 14px; border-radius:4px; cursor:pointer;">Excluir</button>
+            <div class="actions">
+                <button class="btn btn-edit" onclick="openEditModal('${p.id}')">✏️ Editar</button>
+                <button class="btn btn-delete" onclick="deletePlaylist(${p.id})">🗑️ Excluir</button>
+            </div>
         </div>
     `).join('');
 }
@@ -880,11 +1056,11 @@ function renderMusicPlans() {
     const grid = document.getElementById('musicPlansGrid');
     grid.innerHTML = musicPlans.map(p => `
         <div class="music-plan-card">
-            <div style="font-size:2.5em;">${p.logo}</div>
-            <div class="plan-name">${p.name}</div>
+            <div style="font-size:3em; margin-bottom:5px;">${p.logo}</div>
+            <div class="plan-name" style="font-size:1.3em; font-weight:bold;">${p.name}</div>
             <div class="plan-price">${p.price}</div>
-            <div class="plan-duration">${p.days === 365 ? '1 ano' : p.days + ' dias'}</div>
-            <button class="btn btn-music-assinar" onclick="buyMusicPlan('${p.id}')">Assinar</button>
+            <div class="plan-duration" style="margin-bottom:15px;">${p.days === 365 ? '1 ano' : p.days + ' dias'}</div>
+            <button class="btn btn-music-assinar" onclick="buyMusicPlan('${p.id}')">🎵 Assinar Agora</button>
         </div>
     `).join('');
 }
@@ -898,7 +1074,7 @@ function buyMusicPlan(planId) {
     document.getElementById("pixModal").classList.add("active");
 }
 
-// ---------- COMPRAS GERAIS (contas e música) ----------
+// ---------- COMPRAS ----------
 function buyPlan(planId) {
     selectedPlan = plans.find(p => p.id === planId);
     selectedServiceType = 'conta';
@@ -913,7 +1089,6 @@ async function confirmPayment() {
     const payerName = document.getElementById("payerFullName").value.trim();
     if (!payerName) return document.getElementById("pixErrorContainer").innerHTML = '<div style="color:#f44;">Informe o nome do pagador.</div>';
 
-    // Determina duração em dias
     let days = 0;
     if (selectedServiceType === 'conta') {
         const planMap = { "1 Mês": 30, "3 Meses": 90, "6 Meses": 180, "1 Ano": 365, "Vitalício": -1 };
@@ -940,7 +1115,7 @@ async function confirmPayment() {
         alert("Erro ao enviar: " + error.message);
         return;
     }
-    document.getElementById("pendingMessage").innerHTML = '<div style="color:#4caf50;">Comprovante enviado! Aguarde aprovação.<br><button onclick="window.open(\'https://wa.me/message/PWMMI3VQ4LGLP1\',\'_blank\')" style="background:#25d366;color:#fff;border:none;padding:8px;border-radius:5px;margin-top:8px;">Chamar no WhatsApp</button></div>';
+    document.getElementById("pendingMessage").innerHTML = '<div style="color:#4caf50;">✅ Comprovante enviado! Aguarde aprovação.<br><button onclick="window.open(\'https://wa.me/message/PWMMI3VQ4LGLP1\',\'_blank\')" style="background:#25d366;color:#fff;border:none;padding:8px;border-radius:5px;margin-top:8px;">📱 Chamar no WhatsApp</button></div>';
     document.getElementById("pixErrorContainer").innerHTML = '';
 }
 
@@ -1102,18 +1277,23 @@ async function renderProducts(purchaseFromPin = null) {
     grid.className = "products-grid";
 }
 
-// ---------- ABA DE MÚSICA (com verificação de plano) ----------
+// ---------- ABA DE MÚSICA ----------
 async function renderMusicTab() {
+    const subtitle = document.getElementById("musicSubtitle");
+    const plansContainer = document.getElementById("musicPlansContainer");
+    const contentContainer = document.getElementById("musicContentContainer");
+
     if (!isLoggedIn) {
-        document.getElementById("musicPlansContainer").classList.add("hidden");
-        document.getElementById("musicContentContainer").classList.add("hidden");
-        document.getElementById("musicSubtitle").textContent = "🔒 Faça login para acessar a música premium.";
+        plansContainer.classList.add("hidden");
+        contentContainer.classList.add("hidden");
+        subtitle.textContent = "🔒 Faça login para acessar a música premium.";
         return;
     }
 
     let hasActiveMusic = false;
     let activePlan = null;
     let expiryDate = null;
+    let planPrice = null;
 
     if (loggedInPin !== ADMIN_PIN) {
         const { data, error } = await supabaseClient
@@ -1130,26 +1310,29 @@ async function renderMusicTab() {
                 hasActiveMusic = true;
                 activePlan = data.plan_name;
                 expiryDate = data.expiry_date ? new Date(data.expiry_date).toLocaleString("pt-BR") : "Vitalício";
+                planPrice = data.plan_price;
             }
         }
     } else {
-        // Admin tem acesso livre
         hasActiveMusic = true;
         activePlan = "Administrador";
         expiryDate = "—";
+        planPrice = "—";
     }
 
     if (hasActiveMusic) {
-        document.getElementById("musicPlansContainer").classList.add("hidden");
-        document.getElementById("musicContentContainer").classList.remove("hidden");
-        // Mostra informações do plano ativo
-        const subtitle = document.getElementById("musicSubtitle");
-        subtitle.innerHTML = `🎧 Plano ativo: <strong>${activePlan}</strong> | Vencimento: ${expiryDate}`;
+        plansContainer.classList.add("hidden");
+        contentContainer.classList.remove("hidden");
+        subtitle.innerHTML = `
+            🎧 Plano ativo: <strong style="color:#ffa500;">${activePlan}</strong> 
+            ${planPrice ? `(${planPrice})` : ''} 
+            | Vencimento: <strong style="color:#ffa500;">${expiryDate}</strong>
+        `;
         renderPlaylists();
     } else {
-        document.getElementById("musicPlansContainer").classList.remove("hidden");
-        document.getElementById("musicContentContainer").classList.add("hidden");
-        document.getElementById("musicSubtitle").textContent = "Assine um plano para ouvir música sem anúncios";
+        plansContainer.classList.remove("hidden");
+        contentContainer.classList.add("hidden");
+        subtitle.textContent = "🎵 Assine um plano para ouvir música sem anúncios";
         renderMusicPlans();
     }
 }
@@ -1182,7 +1365,6 @@ async function validatePin() {
   const pin = document.getElementById("pinInput").value.trim();
   if (pin.length !== 6) { alert("PIN inválido!"); return; }
 
-  // --- ACESSO ADMIN ---
   if (pin === ADMIN_PIN) {
     const { data: config, error: configError } = await supabaseClient
       .from("admin_config")
@@ -1214,9 +1396,7 @@ async function validatePin() {
       alert("🛡️ Novo dispositivo detectado. Uma solicitação de acesso foi enviada ao administrador. Aguarde a aprovação.");
       return;
     }
-    // Login admin bem-sucedido
-    isLoggedIn = true;
-    loggedInPin = pin;
+    isLoggedIn = true; loggedInPin = pin;
     document.getElementById("pinModal").classList.remove("active");
     document.getElementById("loggedInInfo").style.display = "block";
     document.getElementById("btnVideos").style.display = "inline-block";
@@ -1230,8 +1410,6 @@ async function validatePin() {
     return;
   }
 
-  // --- ACESSO CLIENTE (conta ou música) ---
-  // Busca TODAS as compras com este PIN e status approved
   const { data: purchases, error } = await supabaseClient
     .from("purchases")
     .select("*")
@@ -1249,16 +1427,13 @@ async function validatePin() {
     return;
   }
 
-  // Verifica se pelo menos uma compra está ativa (não expirada)
   let activePurchase = null;
   const now = new Date();
   for (const p of purchases) {
-    // Se for vitalício ou não tiver data de expiração, considera ativo
     if (p.plan_name === "Vitalício" || !p.expiry_date) {
       activePurchase = p;
       break;
     }
-    // Verifica se a data de expiração é futura
     const expiry = new Date(p.expiry_date);
     if (expiry > now) {
       activePurchase = p;
@@ -1271,18 +1446,16 @@ async function validatePin() {
     return;
   }
 
-  // --- LOGIN BEM-SUCEDIDO ---
   isLoggedIn = true;
   loggedInPin = pin;
   document.getElementById("pinModal").classList.remove("active");
   document.getElementById("loggedInInfo").style.display = "block";
   document.getElementById("btnVideos").style.display = "inline-block";
   document.getElementById("btnMusicas").style.display = "inline-block";
-  document.getElementById("btnAdminPlaylists").style.display = "none"; // clientes normais não veem admin
+  document.getElementById("btnAdminPlaylists").style.display = "none";
   document.getElementById("chatPanel").classList.add("hidden");
   document.getElementById("feedbacksSection").style.display = "none";
 
-  // Recarrega as abas
   renderProducts(activePurchase);
   renderMusicTab();
 }
