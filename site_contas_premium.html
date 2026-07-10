@@ -641,9 +641,9 @@ async function searchYoutube() {
 }
 
 function loadYoutubeVideo(videoId) {
-    const embedUrl = `https://invidious.snopyta.org/embed/${videoId}?autoplay=1&rel=0`;
+    // Usando Piped (também sem anúncios)
+    const embedUrl = `https://piped.video/embed/${videoId}?autoplay=1`;
     document.getElementById("youtubePlayer").src = embedUrl;
-    // Opcional: limpa resultados após carregar
     document.getElementById("youtubeResults").innerHTML = `<div style="color:#4caf50;width:100%;text-align:center;">▶ Tocando vídeo (sem anúncios)</div>`;
 }
 
