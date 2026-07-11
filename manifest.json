@@ -2,7 +2,7 @@
   "name": "Premium Streaming VIP",
   "short_name": "Streaming VIP",
   "description": "Acesso ilimitado a contas premium de streaming, músicas e vídeos +18.",
-  "start_url": "/",
+  "start_url": "https://b13l.github.io/premium-streaming/painel_admin_contas.html",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
