@@ -11,7 +11,6 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
     <link rel="icon" type="image/png" href="favicon.ico">
-    <!-- Restante do CSS e conteúdo (mesmo da versão anterior) -->
     <style>
         /* ===== RESET E ESTILOS GERAIS ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -262,8 +261,8 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-        .btn-background {
-            background: linear-gradient(135deg, #ff8800, #ff5500);
+        .btn-pip {
+            background: linear-gradient(135deg, #ff00cc, #8800ff);
             color: #fff;
             padding: 6px 16px;
             border-radius: 20px;
@@ -272,9 +271,14 @@
             cursor: pointer;
             font-size: 0.8em;
             transition: 0.3s;
+            box-shadow: 0 0 15px rgba(255,0,204,0.3);
         }
-        .btn-background:hover {
+        .btn-pip:hover {
             transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255,0,204,0.6);
+        }
+        .btn-pip.hidden {
+            display: none;
         }
 
         /* ===== DESTAQUE NEON "NOVO" ===== */
@@ -719,6 +723,7 @@
         }
         .playlist-card .card-actions {
             display: flex;
+            flex-wrap: wrap;
             gap: 8px;
             margin-top: 8px;
             position: relative;
@@ -853,24 +858,19 @@
     <header>
         <h1>STREAMING PREMIUM VIP</h1>
         <p>Acesso ilimitado a todas as plataformas</p>
-        <!-- Botão Instalar App (PWA) -->
         <button id="installAppBtn" onclick="installApp()">📲 Instalar App</button>
     </header>
 
-    <!-- ===== BANNER DE NOVIDADES ===== -->
     <div class="news-banner" id="newsBanner">
         <h3><span class="pulse"></span> 🆕 Novidades recentes</h3>
         <div class="news-list" id="newsList"></div>
     </div>
 
-    <!-- ===== BOTÕES DE ACESSO ===== -->
     <div class="access-buttons">
-        <!-- Botões para não logados (planos) -->
         <button class="btn-access active" id="btnNewCustomer" onclick="switchMode('new')">Planos VIP</button>
         <button class="btn-access" id="btnExistingCustomer" onclick="switchMode('existing')">Clientes Existentes</button>
         <button class="btn-access" id="btnVideosPlans" onclick="switchMode('videosPlans')" style="display:inline-block;">🎬 Vídeos +18</button>
         <button class="btn-access" id="btnMusicPlans" onclick="switchMode('musicPlans')" style="display:inline-block;">🎵 Músicas Premium</button>
-        <!-- Botões internos (logados) - inicialmente ocultos -->
         <button class="btn-access" id="btnVideos" onclick="switchMode('videos')" style="display:none;">Vídeos +18🔥🔥</button>
         <button class="btn-access" id="btnMusicas" onclick="switchMode('musicas')" style="display:none;">🎵 Músicas Premium</button>
         <button class="btn-access" id="btnAdminPlaylists" onclick="switchMode('adminPlaylists')" style="display:none;">⚙️ Gerenciar Playlists</button>
@@ -881,7 +881,6 @@
         <button onclick="logout()" style="background:#ff4444;color:#fff;border:none;padding:8px 18px;border-radius:15px;margin-left:8px;cursor:pointer;">Sair</button>
     </div>
 
-    <!-- ===== FEEDBACKS ===== -->
     <div id="feedbacksSection" class="feedbacks-section">
         <div class="feedbacks-title">Clientes Satisfeitos</div>
         <div class="testimonial-carousel" id="testimonialCarousel">
@@ -894,12 +893,10 @@
         </div>
     </div>
 
-    <!-- ===== GRADE DE PRODUTOS ===== -->
     <div id="productsGridContainer">
         <div class="products-grid" id="productsGrid"></div>
     </div>
 
-    <!-- ===== CHAT ===== -->
     <div class="chat-panel" id="chatPanel">
         <div class="chat-header">Chat Automático</div>
         <div style="padding:12px;">
@@ -1040,7 +1037,6 @@
     </div>
 </div>
 
-<!-- ===== SCRIPT ===== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ===================== CONSTANTES =====================
@@ -1061,7 +1057,6 @@ if (!currentDeviceId) {
 
 const nomes = ["Rafael","Lucas","Bruno","Pedro","Felipe","João","Marcus","Diego","André","Carlos","Gabriel","Gustavo","Rodrigo","Eduardo","Mateus","Thiago","Leonardo","Vinícius","Henrique","Daniel","Alexandre","Leandro","Fábio","Ricardo","Fernando","Marcelo","Paulo","Renato","Sérgio","Tiago","Caio","Murilo","Igor","Davi","Samuel","Otávio","Guilherme","Renan","Adriano","Cláudio","Roberto","Wellington","Anderson","Douglas","Márcio","Patrick","Julio","Evandro","Flávio","Alan","Vagner","Nilson","Emerson","Luciano","Elias","Cristiano","Walisson","Jonatan","Fabian","Alexsandro","Ana","Julia","Fernanda","Camila","Beatriz","Larissa","Mariana","Amanda","Priscila","Letícia","Isabela","Natália","Aline","Bruna","Tatiane","Vanessa","Renata","Patrícia","Débora","Giovana","Sabrina","Monique","Jéssica","Cláudia","Simone","Adriana","Michele","Viviane","Bianca","Raquel","Eliane","Sueli","Karine","Thaís","Nathalia","Flávia","Luciana","Luana","Dandara","Yasmin","Kevin","Ryan","Bryan","Willian","Erick","Cleiton","Jadson","Danilo","Rogério","Alisson","Wesley","Marcos","Edson","Valdecir","Welton","Gleisson","Jhonatan","Maikel","Claysson","Rômulo"];
 
-// Planos para contas e também para +18 e música (valores iguais)
 const plans = [
     { id: 1, name: "1 Mês",     logo: "📺", price: "R$ 50,00",  duration: 1  },
     { id: 2, name: "3 Meses",   logo: "🎬", price: "R$ 75,00",  duration: 3  },
@@ -1070,7 +1065,6 @@ const plans = [
     { id: 5, name: "Vitalício", logo: "👑", price: "R$ 500,00", duration: -1 }
 ];
 
-// Planos de música (mesmos valores)
 const musicPlans = [
     { id: 'm1', name: "Mensal",     price: "R$ 25,00",  days: 30,  logo: "🎵" },
     { id: 'm2', name: "Trimestral", price: "R$ 35,00",  days: 90,  logo: "🎶" },
@@ -1078,7 +1072,6 @@ const musicPlans = [
     { id: 'm4', name: "Anual",      price: "R$ 100,00", days: 365, logo: "🎼" }
 ];
 
-// Planos +18 (mesmos valores)
 const videosPlans = [
     { id: 'v1', name: "Mensal",     price: "R$ 25,00",  days: 30,  logo: "🔞" },
     { id: 'v2', name: "Trimestral", price: "R$ 35,00",  days: 90,  logo: "🔞" },
@@ -1098,7 +1091,7 @@ let currentMode = "new";
 let isLoggedIn = false;
 let loggedInPin = null;
 let selectedPlan = null;
-let selectedServiceType = 'conta'; // 'conta', 'musica', 'videos'
+let selectedServiceType = 'conta';
 let proofFileData = null;
 let testimonialInterval, notificationInterval;
 
@@ -1125,13 +1118,55 @@ function installApp() {
     }
 }
 
-// ===================== ÁUDIO EM SEGUNDO PLANO =====================
-// Função para tentar abrir o player em modo background (abre em nova guia)
-function openBackgroundPlayer(url) {
-    // Se for uma URL do SoundCloud, tenta abrir diretamente
-    // Alguns navegadores mantêm o áudio em segundo plano
-    window.open(url, '_blank');
-    alert('🎵 Player aberto em nova guia. Mantenha a guia ativa para ouvir em segundo plano.\n\nDica: No Chrome, ative a opção "Reprodução em segundo plano" nas configurações do site para ouvir com a tela desligada.');
+// ===================== PICTURE-IN-PICTURE (PiP) =====================
+async function openPictureInPicture(embedUrl) {
+    // Verifica se a API é suportada
+    if (!('documentPictureInPicture' in window)) {
+        alert('O recurso Picture-in-Picture não é suportado pelo seu navegador.\n\nPara ativar no Chrome: acesse chrome://flags e ative "Document Picture-in-Picture API".');
+        return;
+    }
+
+    try {
+        // Abre a janela PiP
+        const pipWindow = await window.documentPictureInPicture.requestWindow({
+            width: 400,
+            height: 400,
+        });
+
+        // Conteúdo da janela PiP
+        pipWindow.document.body.innerHTML = `
+            <style>
+                body { margin: 0; background: #0a0a0a; display: flex; justify-content: center; align-items: center; height: 100vh; }
+                iframe { width: 100%; height: 100%; border: none; background: #0a0a0a; }
+                .close-btn {
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    background: rgba(255,68,68,0.8);
+                    color: #fff;
+                    border: none;
+                    padding: 6px 12px;
+                    border-radius: 20px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    z-index: 10;
+                    backdrop-filter: blur(5px);
+                }
+                .close-btn:hover { background: #ff4444; }
+            </style>
+            <button class="close-btn" onclick="window.close()">✕ Fechar</button>
+            <iframe src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        `;
+
+        // Fecha automaticamente quando o usuário fechar a janela
+        pipWindow.addEventListener('pagehide', () => {
+            console.log('Janela PiP fechada');
+        });
+
+    } catch (error) {
+        console.error('Erro ao abrir Picture-in-Picture:', error);
+        alert('Não foi possível abrir o Picture-in-Picture. Tente o modo Background (nova guia).');
+    }
 }
 
 // ===================== HELPERS =====================
@@ -1263,7 +1298,6 @@ async function loadNews() {
     }
 }
 
-// Atualizar novidades a cada minuto
 setInterval(loadNews, 60000);
 
 // ===================== MODAL DE CONTAS =====================
@@ -1636,6 +1670,11 @@ function applyFilters() {
         const genreDisplay = p._genre === 'varios' ? 'Vários' : p._genre.charAt(0).toUpperCase() + p._genre.slice(1);
         const isNewClass = p._isNew ? 'neon-new' : '';
         const isNewLabel = p._isNew ? '<span class="neon-new" style="position:absolute;top:-8px;right:-8px;background:#ff00cc;color:#fff;font-size:0.6em;padding:2px 10px;border-radius:12px;box-shadow:0 0 15px #ff00cc;z-index:10;">NOVO</span>' : '';
+
+        // Verifica se o navegador suporta PiP
+        const supportsPip = 'documentPictureInPicture' in window;
+        const pipBtn = supportsPip ? `<button class="btn-pip" onclick="openPictureInPicture('${embedUrl}')">🎬 Modo PiP</button>` : '';
+
         if (!embedUrl || !embedUrl.startsWith('http')) {
             return `
                 <div class="playlist-card ${isNewClass}" style="position:relative;">
@@ -1662,7 +1701,7 @@ function applyFilters() {
                 <div class="card-artist">👤 ${p._artist}</div>
                 <div class="card-desc">${p.description || ''}</div>
                 <div class="card-actions">
-                    <button class="btn-background" onclick="openBackgroundPlayer('${embedUrl}')">🎧 Modo Background</button>
+                    ${pipBtn}
                 </div>
                 <iframe src="${embedUrl}" 
                         frameborder="0" 
