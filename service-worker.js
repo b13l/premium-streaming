@@ -1,13 +1,13 @@
 const CACHE_NAME = 'premium-streaming-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png'
+  '/premium-streaming/',
+  '/premium-streaming/index.html',
+  '/premium-streaming/site_contas_premium.html',
+  '/premium-streaming/manifest.json',
+  '/premium-streaming/icon-192.png',
+  '/premium-streaming/icon-512.png'
 ];
 
-// Instalação do Service Worker
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -18,7 +18,6 @@ self.addEventListener('install', event => {
   );
 });
 
-// Ativação – limpa caches antigos
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
@@ -34,7 +33,6 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Interceptação de requisições – serve do cache
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
