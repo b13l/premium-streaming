@@ -8,9 +8,9 @@
     <meta name="theme-color" content="#0a0a0a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <link rel="icon" type="image/png" href="favicon.ico">
+    <link rel="manifest" href="/premium-streaming/manifest.json">
+    <link rel="apple-touch-icon" href="/premium-streaming/icon-192.png">
+    <link rel="icon" type="image/png" href="/premium-streaming/favicon.ico">
     <style>
         /* ===== RESET E ESTILOS GERAIS (mesmo código anterior) ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -2539,6 +2539,13 @@ async function init() {
     loadNews();
 }
 window.addEventListener("load", init);
+
+      if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/premium-streaming/service-worker.js', { scope: '/premium-streaming/' })
+      .then(() => console.log('✅ Service Worker registrado com escopo /premium-streaming/'))
+      .catch(err => console.warn('❌ Erro ao registrar Service Worker:', err));
+  }
+    
 </script>
 </body>
 </html>
