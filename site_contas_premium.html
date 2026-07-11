@@ -12,7 +12,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <link rel="icon" type="image/png" href="favicon.ico">
     <style>
-        /* ===== RESET E ESTILOS GERAIS ===== */
+        /* ===== RESET E ESTILOS GERAIS (mesmo código anterior) ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -261,7 +261,7 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-        .btn-pip {
+        .btn-pip, .btn-background {
             background: linear-gradient(135deg, #ff00cc, #8800ff);
             color: #fff;
             padding: 6px 16px;
@@ -273,12 +273,19 @@
             transition: 0.3s;
             box-shadow: 0 0 15px rgba(255,0,204,0.3);
         }
-        .btn-pip:hover {
+        .btn-pip:hover, .btn-background:hover {
             transform: scale(1.05);
             box-shadow: 0 0 30px rgba(255,0,204,0.6);
         }
-        .btn-pip.hidden {
+        .btn-pip.hidden, .btn-background.hidden {
             display: none;
+        }
+        .btn-background {
+            background: linear-gradient(135deg, #ff8800, #ff5500);
+            box-shadow: 0 0 15px rgba(255,136,0,0.3);
+        }
+        .btn-background:hover {
+            box-shadow: 0 0 30px rgba(255,136,0,0.6);
         }
 
         /* ===== DESTAQUE NEON "NOVO" ===== */
@@ -1118,22 +1125,28 @@ function installApp() {
     }
 }
 
-// ===================== PICTURE-IN-PICTURE (PiP) =====================
+// ===================== PICTURE-IN-PICTURE (PiP) - CORRIGIDO =====================
+function openBackgroundPlayer(url) {
+    // Fallback: abre em nova guia (modo background)
+    window.open(url, '_blank');
+    alert('🎵 Player aberto em nova guia. Mantenha a guia ativa para ouvir em segundo plano.\n\nDica: No Chrome, ative a opção "Reprodução em segundo plano" nas configurações do site para ouvir com a tela desligada.');
+}
+
 async function openPictureInPicture(embedUrl) {
-    // Verifica se a API é suportada
+    // Verifica suporte
     if (!('documentPictureInPicture' in window)) {
-        alert('O recurso Picture-in-Picture não é suportado pelo seu navegador.\n\nPara ativar no Chrome: acesse chrome://flags e ative "Document Picture-in-Picture API".');
+        alert('❌ Picture-in-Picture não é suportado pelo seu navegador.\n\nUse o botão "🎧 Modo Background" (ao lado) para abrir em nova guia e ouvir em segundo plano.');
         return;
     }
 
     try {
-        // Abre a janela PiP
+        // Cria uma página HTML simples dentro da janela PiP
         const pipWindow = await window.documentPictureInPicture.requestWindow({
             width: 400,
             height: 400,
         });
 
-        // Conteúdo da janela PiP
+        // Conteúdo da janela PiP – com iframe do SoundCloud
         pipWindow.document.body.innerHTML = `
             <style>
                 body { margin: 0; background: #0a0a0a; display: flex; justify-content: center; align-items: center; height: 100vh; }
@@ -1153,19 +1166,34 @@ async function openPictureInPicture(embedUrl) {
                     backdrop-filter: blur(5px);
                 }
                 .close-btn:hover { background: #ff4444; }
+                .info {
+                    position: absolute;
+                    bottom: 10px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    color: #888;
+                    font-size: 0.7em;
+                    background: rgba(0,0,0,0.7);
+                    padding: 4px 12px;
+                    border-radius: 10px;
+                }
             </style>
             <button class="close-btn" onclick="window.close()">✕ Fechar</button>
             <iframe src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            <div class="info">🎵 Tocando em segundo plano</div>
         `;
 
-        // Fecha automaticamente quando o usuário fechar a janela
+        // Evento para quando a janela for fechada
         pipWindow.addEventListener('pagehide', () => {
             console.log('Janela PiP fechada');
         });
 
     } catch (error) {
-        console.error('Erro ao abrir Picture-in-Picture:', error);
-        alert('Não foi possível abrir o Picture-in-Picture. Tente o modo Background (nova guia).');
+        console.error('Erro ao abrir PiP:', error);
+        // Se falhar, oferece o fallback
+        if (confirm('❌ Não foi possível abrir o PiP.\n\nDeseja tentar o "Modo Background" (nova guia)?')) {
+            openBackgroundPlayer(embedUrl);
+        }
     }
 }
 
@@ -1671,9 +1699,10 @@ function applyFilters() {
         const isNewClass = p._isNew ? 'neon-new' : '';
         const isNewLabel = p._isNew ? '<span class="neon-new" style="position:absolute;top:-8px;right:-8px;background:#ff00cc;color:#fff;font-size:0.6em;padding:2px 10px;border-radius:12px;box-shadow:0 0 15px #ff00cc;z-index:10;">NOVO</span>' : '';
 
-        // Verifica se o navegador suporta PiP
+        // Verifica suporte a PiP
         const supportsPip = 'documentPictureInPicture' in window;
         const pipBtn = supportsPip ? `<button class="btn-pip" onclick="openPictureInPicture('${embedUrl}')">🎬 Modo PiP</button>` : '';
+        const bgBtn = `<button class="btn-background" onclick="openBackgroundPlayer('${embedUrl}')">🎧 Modo Background</button>`;
 
         if (!embedUrl || !embedUrl.startsWith('http')) {
             return `
@@ -1702,6 +1731,7 @@ function applyFilters() {
                 <div class="card-desc">${p.description || ''}</div>
                 <div class="card-actions">
                     ${pipBtn}
+                    ${bgBtn}
                 </div>
                 <iframe src="${embedUrl}" 
                         frameborder="0" 
